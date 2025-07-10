@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+/* Forms */
+
+.form-label{
+    @apply text-rose-800/50
+}
+
+.form-input{
+    @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40
+}
+
+.btn-generic{
+    @apply cursor-pointer p-2 bg-rose-800 text-white hover:bg-rose-900 hover:text-rose-200 rounded-lg
+}
+
