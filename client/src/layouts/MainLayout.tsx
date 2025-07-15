@@ -10,7 +10,7 @@ export const MainLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && user.role === 'Programuotojai') navigate('/sterilizavimas');
+    if (user) navigate('/sterilizavimas');
   }, [user, navigate]);
 
   return (

@@ -1,19 +1,13 @@
 import {
-  closestCorners,
   DndContext,
-  useDroppable,
-  type DragEndEvent,
   type UniqueIdentifier,
+  type DragEndEvent,
+  pointerWithin,
 } from '@dnd-kit/core';
-import { useAppDispatch, useAppSelector } from '../store/store';
 
-import { useEffect } from 'react';
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SelectSterilizer } from '../components/sterilization/SelectSterilizer';
+import { TopMenu } from '../components/sterilization/TopMenu';
+import { useAppDispatch, useAppSelector } from '../store/store';
 import {
   getInstruments,
   selectInstruments,
@@ -22,185 +16,217 @@ import {
   getDepartments,
   selectDepartements,
 } from '../store/features/departmentSlice';
-import { SelectSterilizer } from '../components/selectSterilizer';
+import { useEffect } from 'react';
 import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import toast from 'react-hot-toast';
+import { DragableInstrument } from '../components/sterilization/DragableInstrument';
+import type { TInstrument } from '../types';
+import { DragableDepartment } from '../components/sterilization/DragableDepartment';
+import { DroppableSterilizer } from '../components/sterilization/DroppableSterilizer';
+import {
+  addDepartmentToSterilizer,
   addInstrumentToDepartment,
-  selectCurrentCycleNumber,
+  selectedDepartments,
+  selectedInstruments,
 } from '../store/features/sterilizationSlice';
 
-// types/instrumentai.ts
-export type TInstrument = {
-  id: number; // Duomenų bazės ID yra skaičius
-  instrument_code: string; // Jei kodas gali būti raidės ar skaičiai, geriau string
-  instrument_name: string;
-};
-
-// types/skyriai.ts
-export type TDepartment = {
-  id: number; // Duomenų bazės ID yra skaičius
-  department_code: string; // Jei kodas gali būti raidės ar skaičiai, geriau string
-  department_name: string;
-};
+// //////////////////////////////////////
+export interface IInstrumentInDepartment {
+  instrument: TInstrument;
+  uniqueId: string;
+  departmentId: string;
+}
+/////////////////////////////////////////
 
 export const SterilizationPage = () => {
   const dispatch = useAppDispatch();
-  // Užtikriname, kad instrumentai ir skyriai būtų masyvai arba null
-  const instruments = useAppSelector(selectInstruments) as TInstrument[] | null;
-  const departments = useAppSelector(selectDepartements) as
-    | TDepartment[]
-    | null;
+  const allInstruments = useAppSelector(selectInstruments);
+  const allDepartments = useAppSelector(selectDepartements);
 
-  const cycleNumber = useAppSelector(selectCurrentCycleNumber);
+  // Ši būsena laikys skyrius, kurie yra "sterilizatoriuje"
+  const departmentsSelected = useAppSelector(selectedDepartments);
+  const instrumentsSelected = useAppSelector(selectedInstruments);
 
   useEffect(() => {
-    // Siunčiame veiksmą tik jei duomenų dar nėra
-    if (!instruments) {
+    if (!allInstruments) {
       dispatch(getInstruments());
     }
-    if (!departments) {
+    if (!allDepartments) {
       dispatch(getDepartments());
     }
-  }, [dispatch, instruments, departments]); // Priklausomybių masyvas atnaujintas
+  }, [dispatch, allInstruments, allDepartments]);
 
-  // Sukurti unikalų konteinerio ID dnd-kitui (jei reikės vėliau)
-  const droppableContainerIds =
-    departments?.map(
-      (department) => `department-${department.id}` as UniqueIdentifier
-    ) || [];
-
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEndN = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!active || !over) return;
+    if (!over) return; // Niekur nenumesėme
 
-    const draggedId = active.id.toString(); // "instrument-1"
-    const targetId = over.id.toString(); // "department-2"
+    const activeId = active.id;
+    const overId = over.id;
 
-    if (
-      draggedId.startsWith('instrument-') &&
-      targetId.startsWith('department-')
-    ) {
-      const instrumentId = parseInt(draggedId.replace('instrument-', ''), 10);
-      const departmentId = parseInt(targetId.replace('department-', ''), 10);
-      console.log(instrumentId);
-      dispatch(addInstrumentToDepartment({ instrumentId, departmentId }));
+    // Išsiaiškinkime, kokio tipo yra tempimo elementas
+    const isDepartment = activeId.toString().startsWith('department-');
+    // Instrumentai gali būti sugeneruoti su unikaliu ID tempimo metu, bet pradiniame sąraše jie yra "instrument-id"
+    const isOriginalInstrument = activeId.toString().startsWith('instrument-');
+
+    // Išsiaiškinkime, kokio tipo yra numetimo zona
+    const isSterilizerDropzone = overId === 'sterilizer-dropzone';
+    const isDepartmentDropzone = overId
+      .toString()
+      .startsWith('department-dropzone-');
+
+    if (isDepartment && isSterilizerDropzone) {
+      const departmentId = parseInt(
+        activeId.toString().replace('department-', '')
+      );
+      const departmentToMove = allDepartments?.find(
+        (d) => d.id === departmentId
+      );
+
+      // Patikriname, ar skyrius jau nėra sterilizatoriuje
+      if (
+        departmentToMove &&
+        !departmentsSelected.some((d) => d.id === departmentToMove.id)
+      ) {
+        dispatch(
+          addDepartmentToSterilizer({ departmentToMove: departmentToMove })
+        );
+      } else if (departmentToMove) {
+        toast.error(
+          `Skyrius "${departmentToMove.department_name}" jau yra sterilizatoriuje.`
+        );
+      }
+    }
+
+    // --- Logika instrumentų tempimui į skyrius (GALI KARTOTIS) ---
+    if (isOriginalInstrument && isDepartmentDropzone) {
+      handleInstrumentDragToDepartment(overId, activeId);
+    }
+
+    // Draudžiama: Instrumentų tempimas į sterilizatorių (tiesiog nieko nedarome)
+    if (isOriginalInstrument && isSterilizerDropzone) {
+      toast.error('Instrumentų negalima tempti tiesiai į sterilizatorių!');
+
+      return; // Nieko nedarome
+    }
+
+    // Draudžiama: Skyrių tempimas į instrumentų zonas ar kitas netinkamas vietas
+    if (isDepartment && !isSterilizerDropzone) {
+      toast.error('Skyrių galima tempti tik į sterilizatorių!');
+    }
+  };
+
+  const handleInstrumentDragToDepartment = (
+    overId: UniqueIdentifier,
+    activeId: UniqueIdentifier
+  ) => {
+    const instrumentId = parseInt(
+      activeId.toString().replace('instrument-', '')
+    );
+
+    const targetDepartmentIdStr = overId
+      .toString()
+      .replace('department-dropzone-', '');
+    const targetDepartmentId = parseInt(targetDepartmentIdStr);
+
+    const instrumentToMove = allInstruments?.find((i) => i.id === instrumentId);
+
+    if (instrumentToMove && targetDepartmentId) {
+      dispatch(
+        addInstrumentToDepartment({
+          instrument: instrumentToMove,
+          departmentId: `department-dropzone-${targetDepartmentId}`,
+          uniqueId: `${instrumentId}-${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 9)}`,
+        })
+      );
     }
   };
 
   return (
-    <main className='max-w-7xl mx-auto'>
-      <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-        <div className='flex gap-3'>
-          <section className='w-1/3 border p-2 rounded shadow'>
-            {instruments ? (
-              <SortableContext
-                // Naudojame prefiksuotus ID SortableContext'e
-                items={instruments.map(
-                  (instrument) =>
-                    `instrument-${instrument.id}` as UniqueIdentifier
-                )}
-                strategy={verticalListSortingStrategy}
-              >
-                {instruments.map((instrument) => (
-                  // Perduodame visą instrumento objektą
-                  <DragableInstrument
-                    key={`instrument-${instrument.id}`}
-                    instrument={instrument}
-                  />
-                ))}
-              </SortableContext>
-            ) : (
-              <p>Įrankiai įkeliami...</p>
-            )}
-          </section>
-          <section className='w-2/3 flex flex-col gap-2'>
-            <div className='flex gap-3 items-center'>
-              <SelectSterilizer />
-              <div>
-                Partijos Nr. <strong>{cycleNumber}</strong>
-              </div>
-            </div>
-
-            <div className=' grid grid-cols-3 gap-4'>
-              {departments ? (
-                departments.map((department) => (
-                  // Perduodame visą skyriaus objektą
-                  <DroppableDepartment
-                    key={`department-${department.id}`}
-                    department={department}
-                  />
-                ))
+    <main className='max-w-7xl mx-auto flex-col gap-2'>
+      <TopMenu />
+      <DndContext collisionDetection={pointerWithin} onDragEnd={handleDragEndN}>
+        <div className='flex gap-2'>
+          {/* Skyriai ////////////////////////////////////////////////////////////////////// */}
+          <section className='w-1/4 flex-col gap-2'>
+            <h2 className='text-xl text-center font-semibold p-2'>Skyriai</h2>
+            <div className='bg-amber-200 p-1 rounded-lg min-h-56'>
+              {allDepartments ? (
+                <SortableContext
+                  items={
+                    allDepartments
+                      .map(
+                        (department) =>
+                          `department-${department.id}` as UniqueIdentifier
+                      )
+                      .filter(
+                        (id) =>
+                          !departmentsSelected.some(
+                            (d) => `department-${d.id}` === id
+                          )
+                      ) // Filtruojame perkeltus skyrius
+                  }
+                  strategy={verticalListSortingStrategy}
+                >
+                  {allDepartments
+                    .filter(
+                      (d) => !departmentsSelected.some((sd) => sd.id === d.id)
+                    )
+                    .map((department) => (
+                      <DragableDepartment
+                        key={`department-${department.id}`}
+                        department={department}
+                      />
+                    ))}
+                </SortableContext>
               ) : (
-                <p>Skyriai kraunami...</p>
+                <p>Įkeliamas skyrių sąrašas...</p>
+              )}
+            </div>
+          </section>
+          {/* Sterilizatorius ////////////////////////////////////////////////////////////// */}
+          <section className='w-2/4 flex-col gap-2'>
+            <SelectSterilizer />
+            <div className='p-1 rounded-lg mt-1 min-h-56'>
+              <DroppableSterilizer
+                instruments={instrumentsSelected}
+                selectedDepartments={departmentsSelected}
+              />
+            </div>
+          </section>
+          {/* Instrumentai ///////////////////////////////////////////////////////////////////// */}
+          <section className='w-1/4 flex-col gap-2'>
+            <h2 className='text-xl text-center font-semibold p-2'>
+              Instrumentai
+            </h2>
+            <div className='bg-sky-200 p-1 rounded-lg min-h-56'>
+              {allInstruments ? (
+                <SortableContext
+                  items={allInstruments.map(
+                    (instrument) =>
+                      `instrument-${instrument.id}` as UniqueIdentifier
+                  )}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {allInstruments.map((instrument) => (
+                    <DragableInstrument
+                      key={`instrument-${instrument.id}`}
+                      instrument={instrument}
+                    />
+                  ))}
+                </SortableContext>
+              ) : (
+                <p>Įkeliamas instrumentų sąrašas...</p>
               )}
             </div>
           </section>
         </div>
       </DndContext>
     </main>
-  );
-};
-
-// cia bus atskiras komponentas
-interface DragableInstrumentProps {
-  instrument: TInstrument;
-}
-
-const DragableInstrument = ({ instrument }: DragableInstrumentProps) => {
-  const id = `instrument-${instrument.id}`;
-  // Svarbu: useSortable ID turi atitikti SortableContext items ID
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id }); // Pataisyta iš item.id į instrumentas.id
-
-  const style = {
-    transition,
-    transform: CSS.Transform.toString(transform),
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      // key taip pat turi atitikti ID, naudojamus SortableContext ir useSortable
-      className='p-2 border rounded shadow my-1 cursor-grab' // Pridėtas `my-1` ir `cursor-grab` stiliaus patogumui
-    >
-      {instrument.instrument_code}. {instrument.instrument_name}
-    </div>
-  );
-};
-
-// Cia bus atskiras komponentas
-interface DroppableDepartmentProps {
-  department: TDepartment;
-}
-
-const DroppableDepartment = ({ department }: DroppableDepartmentProps) => {
-  // Svarbu: useDroppable ID turi būti unikalus DndContext kontekste
-  const { setNodeRef, isOver } = useDroppable({
-    id: `department-${department.id}` as UniqueIdentifier,
-  });
-
-  const baseClasses =
-    'p-4 border rounded shadow h-32 flex flex-col justify-center items-center text-center cursor-pointer';
-  const highlightClass = isOver
-    ? 'border-blue-500 bg-blue-100'
-    : 'border-gray-200 bg-white';
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`${baseClasses} ${highlightClass}`}
-      // key jau nurodytas tėviniame komponente map'inimo metu, bet jei atvaizduotumėte čia vieną, reikėtų jį turėti.
-      // kadangi perduodam objektą, o ne tiesiog komponentą, key jau yra `SterilizationPage` map'e.
-    >
-      <h3 className='font-bold text-lg'>
-        {department.department_code}. {department.department_name}
-      </h3>
-      {isOver && (
-        <p className='text-sm text-blue-700 mt-2'>Numeskite instrumentą čia!</p>
-      )}
-    </div>
   );
 };

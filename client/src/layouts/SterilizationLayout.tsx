@@ -10,7 +10,7 @@ export const SterilizationLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.role !== 'Programuotojai') navigate('/');
+    if (!user) navigate('/');
   }, [user, navigate]);
 
   return (

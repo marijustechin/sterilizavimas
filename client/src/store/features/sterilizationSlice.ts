@@ -7,33 +7,40 @@ import {
 import type { RootState } from '../store';
 import SterilizationService from '../../services/sterilizationService';
 import HelperService from '../../services/helperService';
+import type { TDepartment, TInstrument } from '../../types';
+import { string } from 'zod';
 
-// ... (Instrument, Department, SterilizationEntry tipai lieka nepakitę)
-
-type SterilizationEntry = {
-  instrumentId: number;
-  departmentId: number;
-};
+export interface ISelectedInstrument {
+  instrument: TInstrument;
+  uniqueId: string;
+  departmentId: string;
+}
 
 // Atnaujintas SterilizationState interfeisas
 interface SterilizationState {
-  //currentBatch: SterilizationEntry[];
   selectedSterilizerId: number | null; // Pasirinkto sterilizatoriaus ID
   currentCycleNumber: number | null; // Apskaičiuotas ciklo numeris šiam sterilizatoriui ir dienai
   loadingCycleNumber: boolean; // Būsena, ar vyksta ciklo numerio gavimas
   cycleNumberError: string | null; // Klaidos pranešimas, jei nepavyko gauti ciklo numerio
 
-  assignments: SterilizationEntry[]; // Nauja dalis
+  departments: TDepartment[];
+  instruments: ISelectedInstrument[];
+
+  infoMessage: string;
 }
 
 const initialState: SterilizationState = {
-  // currentBatch: [],
   selectedSterilizerId: null,
   currentCycleNumber: null,
   loadingCycleNumber: false,
   cycleNumberError: null,
 
-  assignments: [],
+  // selected departments in sterilizer
+  departments: [],
+  // selected instruments in department
+  instruments: [],
+
+  infoMessage: '',
 };
 
 // Async Thunk ciklo numeriui gauti
@@ -54,44 +61,64 @@ const sterilizationSlice = createSlice({
   name: 'sterilization',
   initialState,
   reducers: {
-    // ... (addInstrumentToCycle, removeInstrumentFromCycle, clearCurrentCycle, updateCycleEntryQuantity)
+    // set info message text
+    setMessage: (state, action: PayloadAction<{ message: string }>) => {
+      state.infoMessage = action.payload.message;
+    },
 
     // Veiksmas, skirtas nustatyti pasirinktą sterilizatorių
     setSelectedSterilizer: (state, action: PayloadAction<{ id: number }>) => {
       state.selectedSterilizerId = action.payload.id;
       state.currentCycleNumber = null; // Išvalyti seną ciklo numerį, kol bus gautas naujas
     },
+    // add department to sterilizer
+    addDepartmentToSterilizer: (
+      state,
+      action: PayloadAction<{ departmentToMove: TDepartment }>
+    ) => {
+      state.departments = [
+        ...state.departments,
+        action.payload.departmentToMove,
+      ];
+    },
+    // remove department from sterilizer
+    removeDepartmentFromSterilizer: (
+      state,
+      action: PayloadAction<{ id: number }>
+    ) => {
+      const departmentId = `department-dropzone-${action.payload.id}`;
+      state.departments = state.departments.filter(
+        (item) => item.id !== action.payload.id
+      );
+      state.instruments = state.instruments.filter(
+        (item) => item.departmentId !== departmentId
+      );
+    },
     addInstrumentToDepartment: (
       state,
-      action: PayloadAction<{ instrumentId: number; departmentId: number }>
+      action: PayloadAction<{
+        instrument: TInstrument;
+        departmentId: string;
+        uniqueId: string;
+      }>
     ) => {
-      const { instrumentId, departmentId } = action.payload;
-
-      // Neleidžiame dubliuoti įrašo
-      const alreadyExists = state.assignments.some(
-        (entry) =>
-          entry.instrumentId === instrumentId &&
-          entry.departmentId === departmentId
-      );
-
-      if (!alreadyExists) {
-        state.assignments.push({ instrumentId, departmentId });
-      }
+      state.instruments = [...state.instruments, action.payload];
+      state.infoMessage = `Lipdukų skaičius: ${state.instruments.length}`;
     },
+    // remove instrument from department
     removeInstrumentFromDepartment: (
       state,
-      action: PayloadAction<{ instrumentId: number; departmentId: number }>
+      action: PayloadAction<{ instrument: ISelectedInstrument }>
     ) => {
-      const { instrumentId, departmentId } = action.payload;
-      state.assignments = state.assignments.filter(
-        (entry) =>
-          !(
-            entry.instrumentId === instrumentId &&
-            entry.departmentId === departmentId
-          )
+      const uniqueInstrmentId = action.payload.instrument.uniqueId;
+      state.instruments = state.instruments.filter(
+        (item) => item.uniqueId !== uniqueInstrmentId
       );
+      state.infoMessage = `Lipdukų skaičius: ${state.instruments.length}`;
     },
   },
+
+  // extra ////////////////////////
   extraReducers: (builder) => {
     builder
       .addCase(fetchNextCycleNumber.pending, (state) => {
@@ -116,16 +143,30 @@ const sterilizationSlice = createSlice({
 export const {
   setSelectedSterilizer,
   addInstrumentToDepartment,
-  removeInstrumentFromDepartment, // Naujas eksportas
+  removeInstrumentFromDepartment,
+  addDepartmentToSterilizer,
+  removeDepartmentFromSterilizer,
+  setMessage,
 } = sterilizationSlice.actions;
 
-//export const selectCurrentBatch = (state: RootState) => state.sterilization.currentBatch;
+export const selectedDepartments = (state: RootState) =>
+  state.sterilization.departments;
+
+export const selectedInstruments = (state: RootState) =>
+  state.sterilization.instruments;
+
+export const selectInfoMessage = (state: RootState) =>
+  state.sterilization.infoMessage;
+
 export const selectSelectedSterilizerId = (state: RootState) =>
   state.sterilization.selectedSterilizerId;
+
 export const selectCurrentCycleNumber = (state: RootState) =>
   state.sterilization.currentCycleNumber;
+
 export const selectLoadingCycleNumber = (state: RootState) =>
   state.sterilization.loadingCycleNumber;
+
 export const selectCycleNumberError = (state: RootState) =>
   state.sterilization.cycleNumberError;
 
