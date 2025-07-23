@@ -1,10 +1,7 @@
-import dbAutoclave from '../config/db';
-import DbDepartments from './dbDepartments';
-
-const dbDepartments = new DbDepartments(dbAutoclave);
+import { prisma } from '../config/prisma';
 
 export default class DepartmentService {
   static async getAll() {
-    return await dbDepartments.getAllDepartments();
+    return await prisma.department.findMany();
   }
 }

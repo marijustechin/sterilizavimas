@@ -8,7 +8,7 @@ import type { RootState } from '../store';
 import SterilizationService from '../../services/sterilizationService';
 import HelperService from '../../services/helperService';
 import type { TDepartment, TInstrument } from '../../types';
-import { string } from 'zod';
+import { boolean } from 'zod';
 
 export interface ISelectedInstrument {
   instrument: TInstrument;
@@ -27,6 +27,7 @@ interface SterilizationState {
   instruments: ISelectedInstrument[];
 
   infoMessage: string;
+  printingPreview: boolean;
 }
 
 const initialState: SterilizationState = {
@@ -41,6 +42,7 @@ const initialState: SterilizationState = {
   instruments: [],
 
   infoMessage: '',
+  printingPreview: false,
 };
 
 // Async Thunk ciklo numeriui gauti
@@ -61,6 +63,11 @@ const sterilizationSlice = createSlice({
   name: 'sterilization',
   initialState,
   reducers: {
+    // set printing preview
+    setPrintingPreview: (state, action: PayloadAction<{ value: boolean }>) => {
+      state.printingPreview = action.payload.value;
+    },
+
     // set info message text
     setMessage: (state, action: PayloadAction<{ message: string }>) => {
       state.infoMessage = action.payload.message;
@@ -147,6 +154,7 @@ export const {
   addDepartmentToSterilizer,
   removeDepartmentFromSterilizer,
   setMessage,
+  setPrintingPreview,
 } = sterilizationSlice.actions;
 
 export const selectedDepartments = (state: RootState) =>
@@ -169,5 +177,8 @@ export const selectLoadingCycleNumber = (state: RootState) =>
 
 export const selectCycleNumberError = (state: RootState) =>
   state.sterilization.cycleNumberError;
+
+export const selectPrintingPreview = (state: RootState) =>
+  state.sterilization.printingPreview;
 
 export default sterilizationSlice.reducer;

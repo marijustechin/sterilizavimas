@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,7 +13,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Test {
-  id   Int    @id @default(autoincrement())
-  name String
+model Instrument {
+  id              Int    @id @default(autoincrement())
+  instrument_name String
+  instrument_code String @unique
+}
+
+model Department {
+  id              Int    @id @default(autoincrement())
+  department_name String
+  department_code String @unique
+}
+
+model Sterilizer {
+  id              Int    @id @default(autoincrement())
+  sterilizer_name String @db.VarChar(100)
+}
+
+model Jwt {
+  user_id       String @id @db.VarChar(36)
+  refresh_token String @db.Text
+  username      String @db.VarChar(100)
+  display_name  String @db.VarChar(100)
+  division      String @db.VarChar(100)
+  role          String @db.VarChar(100)
 }

@@ -6,4 +6,6 @@ export default class SterilizationService {
 
     return response.data;
   }
+
+  static async saveSterilizationCycle() {}
 }

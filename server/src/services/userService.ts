@@ -2,9 +2,9 @@ import { Client } from 'ldapts';
 import { stringify } from 'uuid';
 import TokenService from './tokenService';
 import ApiError from '../errors/apiErrors';
-import DbService from './dbService';
-import dbAutoclave from '../config/db';
 import { JwtPayload } from 'jsonwebtoken';
+
+import { prisma } from '../config/prisma';
 
 type TldapUser = {
   dn: string;
@@ -23,9 +23,6 @@ type TUser = {
     division: string;
   };
 };
-
-// Sukuriame DbService instancą vieną kartą
-const dbServiceInstance = new DbService(dbAutoclave);
 
 export default class UserService {
   /**
@@ -131,7 +128,23 @@ export default class UserService {
       const tokens = TokenService.generateTokens(userData);
 
       // irasom refreshToken i db
-      await dbServiceInstance.insertRefreshToken(userData, tokens.refreshToken);
+      // jei yra senas, istrinam ji
+      await prisma.jwt.deleteMany({
+        where: {
+          user_id: userData.userId,
+        },
+      });
+
+      await prisma.jwt.create({
+        data: {
+          user_id: userData.userId,
+          username: userData.username,
+          display_name: userData.displayName,
+          division: userData.division,
+          role: userData.role,
+          refresh_token: tokens.refreshToken,
+        },
+      });
 
       return {
         ...tokens,
@@ -153,9 +166,11 @@ export default class UserService {
 
     if (!userData) throw ApiError.BadRequest('Neteisinga užklausa');
 
-    const token = await dbServiceInstance.deleteRefreshTokenByToken(
-      refreshToken
-    );
+    const token = await prisma.jwt.deleteMany({
+      where: {
+        refresh_token: refreshToken,
+      },
+    });
 
     return token;
   }
@@ -166,7 +181,11 @@ export default class UserService {
     const userData = TokenService.validateRefreshToken(refreshToken);
 
     // tikrinam, ar db yra tas refresh token
-    const tokenFromDb = await dbServiceInstance.findTokenByToken(refreshToken);
+    const tokenFromDb = await prisma.jwt.findFirst({
+      where: {
+        refresh_token: refreshToken,
+      },
+    });
 
     // ar refresh token geras? ar toks pat refresh token yra db?
     if (!userData || !tokenFromDb) {
@@ -177,6 +196,16 @@ export default class UserService {
     const { iat, exp, ...cleanPayload } = userData;
 
     const tokens = TokenService.generateTokens(cleanPayload as JwtPayload);
+
+    // irasome nauja tokena į db
+    await prisma.jwt.update({
+      where: {
+        user_id: tokenFromDb.user_id,
+      },
+      data: {
+        refresh_token: tokens.refreshToken,
+      },
+    });
 
     return {
       accessToken: tokens.accessToken,

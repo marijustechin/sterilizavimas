@@ -51,7 +51,7 @@ export const DroppableDepartment = ({
           className='text-rose-500 p-1 cursor-pointer'
           onClick={() => handleRemoveDeparment(department)}
         >
-          <MdDeleteForever size={24} />
+          ❌
         </button>{' '}
         {department.department_code}. {department.department_name}
       </h3>
@@ -77,7 +77,7 @@ export const DroppableDepartment = ({
                   onClick={() => handleRemoveInstrument(item)}
                 >
                   ❌
-                </button>
+                </button>{' '}
                 {item.instrument.instrument_code}.{' '}
                 {item.instrument.instrument_name}
               </div>

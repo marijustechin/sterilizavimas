@@ -16,7 +16,7 @@ import {
   getDepartments,
   selectDepartements,
 } from '../store/features/departmentSlice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -31,7 +31,9 @@ import {
   addInstrumentToDepartment,
   selectedDepartments,
   selectedInstruments,
+  selectPrintingPreview,
 } from '../store/features/sterilizationSlice';
+import { StickerList } from '../components/sticker/StickerList';
 
 // //////////////////////////////////////
 export interface IInstrumentInDepartment {
@@ -49,6 +51,7 @@ export const SterilizationPage = () => {
   // Ši būsena laikys skyrius, kurie yra "sterilizatoriuje"
   const departmentsSelected = useAppSelector(selectedDepartments);
   const instrumentsSelected = useAppSelector(selectedInstruments);
+  const printingPreview = useAppSelector(selectPrintingPreview);
 
   useEffect(() => {
     if (!allInstruments) {
@@ -150,83 +153,90 @@ export const SterilizationPage = () => {
   return (
     <main className='max-w-7xl mx-auto flex-col gap-2'>
       <TopMenu />
-      <DndContext collisionDetection={pointerWithin} onDragEnd={handleDragEndN}>
-        <div className='flex gap-2'>
-          {/* Skyriai ////////////////////////////////////////////////////////////////////// */}
-          <section className='w-1/4 flex-col gap-2'>
-            <h2 className='text-xl text-center font-semibold p-2'>Skyriai</h2>
-            <div className='bg-amber-200 p-1 rounded-lg min-h-56'>
-              {allDepartments ? (
-                <SortableContext
-                  items={
-                    allDepartments
-                      .map(
-                        (department) =>
-                          `department-${department.id}` as UniqueIdentifier
-                      )
+      {printingPreview ? (
+        <StickerList />
+      ) : (
+        <DndContext
+          collisionDetection={pointerWithin}
+          onDragEnd={handleDragEndN}
+        >
+          <div className='flex gap-2'>
+            {/* Skyriai ////////////////////////////////////////////////////////////////////// */}
+            <section className='w-1/4 flex-col gap-2'>
+              <h2 className='text-xl text-center font-semibold p-2'>Skyriai</h2>
+              <div className='bg-amber-200 p-1 rounded-lg min-h-56'>
+                {allDepartments ? (
+                  <SortableContext
+                    items={
+                      allDepartments
+                        .map(
+                          (department) =>
+                            `department-${department.id}` as UniqueIdentifier
+                        )
+                        .filter(
+                          (id) =>
+                            !departmentsSelected.some(
+                              (d) => `department-${d.id}` === id
+                            )
+                        ) // Filtruojame perkeltus skyrius
+                    }
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {allDepartments
                       .filter(
-                        (id) =>
-                          !departmentsSelected.some(
-                            (d) => `department-${d.id}` === id
-                          )
-                      ) // Filtruojame perkeltus skyrius
-                  }
-                  strategy={verticalListSortingStrategy}
-                >
-                  {allDepartments
-                    .filter(
-                      (d) => !departmentsSelected.some((sd) => sd.id === d.id)
-                    )
-                    .map((department) => (
-                      <DragableDepartment
-                        key={`department-${department.id}`}
-                        department={department}
+                        (d) => !departmentsSelected.some((sd) => sd.id === d.id)
+                      )
+                      .map((department) => (
+                        <DragableDepartment
+                          key={`department-${department.id}`}
+                          department={department}
+                        />
+                      ))}
+                  </SortableContext>
+                ) : (
+                  <p>Įkeliamas skyrių sąrašas...</p>
+                )}
+              </div>
+            </section>
+            {/* Sterilizatorius ////////////////////////////////////////////////////////////// */}
+            <section className='w-2/4 flex-col gap-2'>
+              <SelectSterilizer />
+              <div className='p-1 rounded-lg mt-1 min-h-56'>
+                <DroppableSterilizer
+                  instruments={instrumentsSelected}
+                  selectedDepartments={departmentsSelected}
+                />
+              </div>
+            </section>
+            {/* Instrumentai ///////////////////////////////////////////////////////////////////// */}
+            <section className='w-1/4 flex-col gap-2'>
+              <h2 className='text-xl text-center font-semibold p-2'>
+                Instrumentai
+              </h2>
+              <div className='bg-sky-200 p-1 rounded-lg min-h-56'>
+                {allInstruments ? (
+                  <SortableContext
+                    items={allInstruments.map(
+                      (instrument) =>
+                        `instrument-${instrument.id}` as UniqueIdentifier
+                    )}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {allInstruments.map((instrument) => (
+                      <DragableInstrument
+                        key={`instrument-${instrument.id}`}
+                        instrument={instrument}
                       />
                     ))}
-                </SortableContext>
-              ) : (
-                <p>Įkeliamas skyrių sąrašas...</p>
-              )}
-            </div>
-          </section>
-          {/* Sterilizatorius ////////////////////////////////////////////////////////////// */}
-          <section className='w-2/4 flex-col gap-2'>
-            <SelectSterilizer />
-            <div className='p-1 rounded-lg mt-1 min-h-56'>
-              <DroppableSterilizer
-                instruments={instrumentsSelected}
-                selectedDepartments={departmentsSelected}
-              />
-            </div>
-          </section>
-          {/* Instrumentai ///////////////////////////////////////////////////////////////////// */}
-          <section className='w-1/4 flex-col gap-2'>
-            <h2 className='text-xl text-center font-semibold p-2'>
-              Instrumentai
-            </h2>
-            <div className='bg-sky-200 p-1 rounded-lg min-h-56'>
-              {allInstruments ? (
-                <SortableContext
-                  items={allInstruments.map(
-                    (instrument) =>
-                      `instrument-${instrument.id}` as UniqueIdentifier
-                  )}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {allInstruments.map((instrument) => (
-                    <DragableInstrument
-                      key={`instrument-${instrument.id}`}
-                      instrument={instrument}
-                    />
-                  ))}
-                </SortableContext>
-              ) : (
-                <p>Įkeliamas instrumentų sąrašas...</p>
-              )}
-            </div>
-          </section>
-        </div>
-      </DndContext>
+                  </SortableContext>
+                ) : (
+                  <p>Įkeliamas instrumentų sąrašas...</p>
+                )}
+              </div>
+            </section>
+          </div>
+        </DndContext>
+      )}
     </main>
   );
 };

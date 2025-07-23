@@ -1,10 +1,7 @@
-import dbAutoclave from '../config/db';
-import DbSterilizers from './dbSterilizers';
-
-const dbSterilizers = new DbSterilizers(dbAutoclave);
+import { prisma } from '../config/prisma';
 
 export default class SterilizerService {
   static async getAll() {
-    return await dbSterilizers.getAllSterilizers();
+    return await prisma.sterilizer.findMany();
   }
 }
