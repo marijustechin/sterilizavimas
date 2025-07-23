@@ -8,7 +8,6 @@ import type { RootState } from '../store';
 import SterilizationService from '../../services/sterilizationService';
 import HelperService from '../../services/helperService';
 import type { TDepartment, TInstrument } from '../../types';
-import { boolean } from 'zod';
 
 export interface ISelectedInstrument {
   instrument: TInstrument;
