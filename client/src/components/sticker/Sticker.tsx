@@ -4,9 +4,7 @@
 // Į QR kodą dedama tokia informacija, kad ją nuskaičius būtų gaunami iš duomenų bazės
 // duomenys konkrečiai idenfifikuojantys instrumentą ir jo dezinfekavimą
 
-import { selectUser } from '../../store/features/authSlice';
 import type { ISelectedInstrument } from '../../store/features/sterilizationSlice';
-import { useAppSelector } from '../../store/store';
 import type { TDepartment } from '../../types';
 
 import { format, addMonths } from 'date-fns';
@@ -25,7 +23,6 @@ export const Sticker = ({
   instrument,
   department,
 }: IStickerProps) => {
-  const employee = useAppSelector(selectUser);
   const today = new Date();
   const dateEnd = addMonths(today, 6);
   const formattedDateNow = format(today, 'yyyy-MM-dd');

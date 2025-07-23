@@ -7,5 +7,7 @@ export default class SterilizationService {
     return response.data;
   }
 
-  static async saveSterilizationCycle() {}
+  static async saveSterilizationCycle() {
+    return;
+  }
 }

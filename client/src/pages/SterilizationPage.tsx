@@ -16,7 +16,7 @@ import {
   getDepartments,
   selectDepartements,
 } from '../store/features/departmentSlice';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   SortableContext,
   verticalListSortingStrategy,
