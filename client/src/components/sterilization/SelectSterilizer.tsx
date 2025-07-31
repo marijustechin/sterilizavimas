@@ -8,14 +8,12 @@ import {
 import {
   fetchNextCycleNumber,
   selectCurrentCycleNumber,
-  selectSelectedSterilizerId,
   setSelectedSterilizer,
 } from '../../store/features/sterilizationSlice';
 
 export const SelectSterilizer = () => {
   const dispatch = useAppDispatch();
   const sterilizers = useAppSelector(selectSterilizer);
-  const selectedSterilizer = useAppSelector(selectSelectedSterilizerId);
 
   const cycleNumber = useAppSelector(selectCurrentCycleNumber);
 

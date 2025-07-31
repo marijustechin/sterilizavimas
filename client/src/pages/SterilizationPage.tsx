@@ -54,7 +54,7 @@ export const SterilizationPage = () => {
   const printingPreview = useAppSelector(selectPrintingPreview);
 
   useEffect(() => {
-    if (!allInstruments) {
+    if (allInstruments.length === 0) {
       dispatch(getInstruments());
     }
     if (!allDepartments) {

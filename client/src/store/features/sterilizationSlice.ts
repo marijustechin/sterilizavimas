@@ -7,13 +7,11 @@ import {
 import type { RootState } from '../store';
 import SterilizationService from '../../services/sterilizationService';
 import HelperService from '../../services/helperService';
-import type { TDepartment, TInstrument } from '../../types';
-
-export interface ISelectedInstrument {
-  instrument: TInstrument;
-  uniqueId: string;
-  departmentId: string;
-}
+import type {
+  ISelectedInstrument,
+  TDepartment,
+  TInstrument,
+} from '../../types';
 
 // Atnaujintas SterilizationState interfeisas
 interface SterilizationState {

@@ -8,6 +8,9 @@ import { SterilizationLayout } from './layouts/SterilizationLayout';
 import { useAppDispatch, useAppSelector } from './store/store';
 import { checkAuth, selectIsInitialized } from './store/features/authSlice';
 import { useEffect } from 'react';
+import { AdminInstruments } from './pages/admin/AdminInstruments';
+import { AdminDepartments } from './pages/admin/AdminDepartments';
+import { AdminSterilizers } from './pages/admin/AdminSterilizers';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -33,6 +36,9 @@ function App() {
         </Route>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminPage />} />
+          <Route path='/admin/instrumentai' element={<AdminInstruments />} />
+          <Route path='/admin/skyriai' element={<AdminDepartments />} />
+          <Route path='/admin/sterilizatoriai' element={<AdminSterilizers />} />
         </Route>
         <Route path='/sterilizavimas' element={<SterilizationLayout />}>
           <Route index element={<SterilizationPage />} />

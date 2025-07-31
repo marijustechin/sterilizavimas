@@ -8,4 +8,9 @@ sterilizationRouter.get(
   SterilizationController.getCycleNumber
 );
 
+sterilizationRouter.post(
+  '/sterilization-cyclein',
+  SterilizationController.saveSterilizationCycle
+);
+
 export default sterilizationRouter;

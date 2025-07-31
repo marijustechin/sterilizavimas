@@ -16,18 +16,25 @@ datasource db {
 model Instrument {
   id              Int    @id @default(autoincrement())
   instrument_name String
-  instrument_code String @unique
+  instrument_code Int    @unique
+  instrument_exp  Int    @default(6)
+
+  items SterilizationCycleItem[]
 }
 
 model Department {
   id              Int    @id @default(autoincrement())
   department_name String
   department_code String @unique
+
+  items SterilizationCycleItem[]
 }
 
 model Sterilizer {
   id              Int    @id @default(autoincrement())
   sterilizer_name String @db.VarChar(100)
+
+  cycles SterilizationCycle[]
 }
 
 model Jwt {
@@ -37,4 +44,46 @@ model Jwt {
   display_name  String @db.VarChar(100)
   division      String @db.VarChar(100)
   role          String @db.VarChar(100)
+}
+
+model SterilizationCycle {
+  id                       Int      @id @default(autoincrement())
+  user_id                  String
+  sterilizer_id            Int
+  cycle_number             Int
+  sterilization_date       DateTime @default(now())
+  expiration_period_months Int
+
+  sterilizer Sterilizer               @relation(fields: [sterilizer_id], references: [id])
+  items      SterilizationCycleItem[]
+
+  @@index([cycle_number])
+  @@index([user_id])
+}
+
+model SterilizationCycleItem {
+  id            Int @id @default(autoincrement())
+  cycle_id      Int
+  instrument_id Int
+  department_id Int
+  qty           Int @default(1)
+
+  cycle      SterilizationCycle @relation(fields: [cycle_id], references: [id])
+  instrument Instrument         @relation(fields: [instrument_id], references: [id])
+  department Department         @relation(fields: [department_id], references: [id])
+
+  InstrumentUsage InstrumentUsage[]
+}
+
+model InstrumentUsage {
+  id              Int      @id @default(autoincrement())
+  cycle_item_id   Int
+  used_by_user_id String // čia bus objectGUID string
+  patient_id      String
+  usage_timestamp DateTime @default(now())
+
+  cycle_item SterilizationCycleItem @relation(fields: [cycle_item_id], references: [id])
+  // no @relation to User
+
+  @@index([used_by_user_id])
 }
