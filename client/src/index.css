@@ -10,7 +10,23 @@
     @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40
 }
 
+.form-textarea{
+    @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40
+}
+
 .btn-generic{
     @apply cursor-pointer p-2 bg-rose-800 text-white hover:bg-rose-900 hover:text-rose-200 rounded-lg
+}
+
+.btn-rose{
+    @apply cursor-pointer p-2 rounded-lg bg-rose-300 hover:bg-rose-500
+}
+
+.btn-emerald{
+    @apply cursor-pointer p-2 rounded-lg bg-emerald-300 hover:bg-emerald-500
+}
+
+.btn-amber{
+    @apply cursor-pointer p-2 rounded-lg bg-amber-300 hover:bg-amber-500
 }
 

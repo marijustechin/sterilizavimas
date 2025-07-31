@@ -4,11 +4,6 @@ export interface ISelectedInstrument {
   departmentId: string;
 }
 
-export type TSterilizer = {
-  id: number;
-  sterilizer_name: string;
-};
-
 export type TInstrument = {
   id: number;
   instrument_code: number;

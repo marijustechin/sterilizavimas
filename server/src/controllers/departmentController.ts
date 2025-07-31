@@ -14,4 +14,40 @@ export default class DepartmentController {
       next(error);
     }
   }
+
+  static async delete(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      res.status(200).json('delete department ok');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async patch(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      res.status(200).json('patch department ok');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async create(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      res.status(200).json('create department ok');
+    } catch (error) {
+      next(error);
+    }
+  }
 }

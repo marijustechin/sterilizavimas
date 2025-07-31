@@ -28,8 +28,8 @@ export default class ApiError extends Error {
     return new ApiError(StatusCodes.FORBIDDEN, 'No permission');
   }
 
-  static NotFound() {
-    return new ApiError(StatusCodes.NOT_FOUND, 'Not found');
+  static NotFound(message: string, errors: unknown[] = []) {
+    return new ApiError(StatusCodes.NOT_FOUND, message, errors);
   }
 
   static Conflict(message: string, errors: unknown[] = []) {
