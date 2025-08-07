@@ -21,7 +21,11 @@ export default class DepartmentController {
     next: NextFunction
   ): Promise<void> {
     try {
-      res.status(200).json('delete department ok');
+      const { id } = req.params;
+
+      const deletedDepartment = await DepartmentService.delete(Number(id));
+
+      res.status(200).json(deletedDepartment);
     } catch (error) {
       next(error);
     }
@@ -33,7 +37,15 @@ export default class DepartmentController {
     next: NextFunction
   ): Promise<void> {
     try {
-      res.status(200).json('patch department ok');
+      const { id, department_code, department_name } = req.body;
+
+      const updatedDepartment = await DepartmentService.patch({
+        id: id,
+        department_code: department_code,
+        department_name: department_name,
+      });
+
+      res.status(200).json(updatedDepartment);
     } catch (error) {
       next(error);
     }
@@ -45,7 +57,14 @@ export default class DepartmentController {
     next: NextFunction
   ): Promise<void> {
     try {
-      res.status(200).json('create department ok');
+      const { department_code, department_name } = req.body;
+
+      const newDepartment = await DepartmentService.create({
+        department_code: department_code,
+        department_name: department_name,
+      });
+
+      res.status(200).json(newDepartment);
     } catch (error) {
       next(error);
     }

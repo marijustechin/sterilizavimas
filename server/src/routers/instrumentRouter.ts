@@ -1,5 +1,5 @@
-import InstrumentController from '../controllers/instrumentController';
 import express from 'express';
+import InstrumentController from '../controllers/instrumentController';
 
 const instrumentRouter = express.Router();
 

@@ -4,7 +4,11 @@ import ApiError from '../errors/apiErrors';
 
 export default class InstrumentService {
   static async getAll() {
-    return await prisma.instrument.findMany();
+    return await prisma.instrument.findMany({
+      orderBy: {
+        instrument_code: 'asc',
+      },
+    });
   }
 
   static async delete(id: number): Promise<TInstrument> {

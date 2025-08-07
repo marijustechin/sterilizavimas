@@ -8,26 +8,55 @@ interface IInstrumentState {
   instruments: TInstrument[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
+  currentPage: number;
+  sort: string;
+  filter: string;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 const initialState: IInstrumentState = {
   instruments: [],
   status: 'idle',
   error: null,
+  currentPage: 1,
+  sort: 'asc',
+  filter: '',
+  limit: 10,
+  totalItems: 0,
+  totalPages: 0,
 };
 
 // Get all instruments
-export const getInstruments = createAsyncThunk<TInstrument[]>(
-  'instrument/getInstruments',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await InstrumentService.getAll();
-      return response;
-    } catch (error) {
-      return rejectWithValue(HelperService.errorToString(error));
-    }
+export const getInstruments = createAsyncThunk<
+  TInstrument[],
+  void,
+  { state: RootState }
+>('instrument/getInstruments', async (_, { getState, rejectWithValue }) => {
+  try {
+    const state = getState();
+    const currentPage = state.instruments.currentPage;
+    const sort = state.instruments.sort;
+    const limit = state.instruments.limit;
+    const filter = state.instruments.filter;
+
+    const query =
+      '?page=' +
+      currentPage +
+      '&limit=' +
+      limit +
+      '&sort=' +
+      sort +
+      '&filter=' +
+      filter;
+
+    const response = await InstrumentService.getAll(query);
+    return response;
+  } catch (error) {
+    return rejectWithValue(HelperService.errorToString(error));
   }
-);
+});
 
 // Delete instrumment
 export const deleteInstrument = createAsyncThunk<TInstrument, { id: number }>(

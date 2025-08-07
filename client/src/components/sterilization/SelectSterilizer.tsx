@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   getSterilizers,
   selectSterilizer,
+  selectSterilizerStatus,
 } from '../../store/features/sterilizerSlice';
 import {
   fetchNextCycleNumber,
@@ -14,12 +15,13 @@ import {
 export const SelectSterilizer = () => {
   const dispatch = useAppDispatch();
   const sterilizers = useAppSelector(selectSterilizer);
+  const sterilizerStatus = useAppSelector(selectSterilizerStatus);
 
   const cycleNumber = useAppSelector(selectCurrentCycleNumber);
 
   useEffect(() => {
-    dispatch(getSterilizers());
-  }, [dispatch]);
+    if (sterilizerStatus === 'idle') dispatch(getSterilizers());
+  }, [dispatch, sterilizerStatus]);
 
   const handleOnChange = (id: string) => {
     dispatch(setSelectedSterilizer({ id: parseInt(id) }));

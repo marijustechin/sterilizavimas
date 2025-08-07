@@ -1,93 +1,97 @@
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { TInstrument } from '../../types';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { AddEditInstrumentSchema } from '../../schemas/AddEditInstrumentSchema';
-import { zodResolver } from '@hookform/resolvers/zod';
+import type { TDepartment } from '../../types';
 import { useAppDispatch, useAppSelector } from '../../store/store';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { AddEditDepartmentSchema } from '../../schemas/AddEditDepartmentSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import {
-  createInstrument,
-  selectInstrumentStatus,
-  updateInstrument,
-} from '../../store/features/instrumentSlice';
+  createDepartment,
+  selectDepartmentStatus,
+  updateDepartment,
+} from '../../store/features/departmentSlice';
 import toast from 'react-hot-toast';
 
-interface AddEditInstrumentFormProps {
+interface AddEditDepartmentFormProps {
   isOpen: boolean;
   onCancel: () => void;
-  instrument: TInstrument | null;
+  department: TDepartment | null;
 }
 
-export const AddEditInstrumentForm: React.FC<AddEditInstrumentFormProps> = ({
-  instrument,
+export const AddEditDepartmentForm: React.FC<AddEditDepartmentFormProps> = ({
   isOpen,
   onCancel,
+  department,
 }) => {
   const dispatch = useAppDispatch();
-  const status = useAppSelector(selectInstrumentStatus);
+  const status = useAppSelector(selectDepartmentStatus);
+
+  //   Forma
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(AddEditInstrumentSchema),
+    resolver: zodResolver(AddEditDepartmentSchema),
   });
 
   const onSubmit: SubmitHandler<
-    z.infer<typeof AddEditInstrumentSchema>
+    z.infer<typeof AddEditDepartmentSchema>
   > = async (formValues) => {
     try {
-      if (instrument) {
+      if (department) {
         // Redagavimas
-        const instrumentToUpdate = { id: instrument.id, ...formValues };
+        const departmentToEdit = { id: department.id, ...formValues };
+
         await dispatch(
-          updateInstrument({ instrument: instrumentToUpdate })
+          updateDepartment({ department: departmentToEdit })
         ).unwrap();
+
         toast.success(
-          `Instrumentas ${formValues.instrument_code}. ${formValues.instrument_name} sėkmingai išsaugotas!`
+          `Skyrius ${formValues.department_code}. ${formValues.department_name} sėkmingai išsaugotas!`
         );
       } else {
-        // Naujas instrumentas
-        await dispatch(createInstrument({ instrument: formValues })).unwrap();
+        // Naujas skyrius
+        await dispatch(createDepartment({ department: formValues })).unwrap();
+
         toast.success(
-          `Instrumentas ${formValues.instrument_code}. ${formValues.instrument_name} sėkmingai pridėtas!`
+          `Skyrius ${formValues.department_code}. ${formValues.department_name} sėkmingai pridėtas!`
         );
       }
+
       handleCancel();
-    } catch (err) {
-      if (typeof err === 'string') {
-        toast.error(err);
+    } catch (error) {
+      if (typeof error === 'string') {
+        toast.error(error);
       } else {
         toast.error('Įvyko nenumatyta klaida!');
       }
     }
   };
 
+  // Pradinis formos inicijavimas
   useEffect(() => {
-    if (instrument) {
+    if (department) {
       reset({
-        instrument_code: instrument.instrument_code,
-        instrument_name: instrument.instrument_name,
-        instrument_exp: instrument.instrument_exp,
+        department_code: department.department_code,
+        department_name: department.department_name,
       });
     } else {
       reset({
-        instrument_code: null,
-        instrument_name: '',
-        instrument_exp: null,
+        department_code: null,
+        department_name: '',
       });
     }
-  }, [instrument, reset]);
+  }, [reset, department]);
 
   const handleCancel = () => {
     reset({
-      instrument_code: null,
-      instrument_name: '',
-      instrument_exp: null,
+      department_code: null,
+      department_name: '',
     });
-    // Tada uždarome modalinį langą
+
     onCancel();
   };
 
@@ -110,66 +114,47 @@ export const AddEditInstrumentForm: React.FC<AddEditInstrumentFormProps> = ({
             onSubmit={handleSubmit(onSubmit)}
           >
             <h2 className='font-semibold text-xl'>
-              {instrument ? 'Instrumento redagavimas' : 'Naujas instrumentas'}
+              {department ? 'Skyriaus redagavimas' : 'Naujas skyrius'}
             </h2>
-            {/* Kodas, pavadinimas ir galiojimas */}
+            {/* Kodas, pavadinimas */}
             <div className='flex gap-3 w-full '>
-              {/* Instrumento kodas */}
+              {/* Skyriaus kodas */}
               <fieldset className='border border-rose-950 p-2 rounded-lg w-1/6'>
                 <legend className='px-3 text-rose-950 font-semibold'>
                   Kodas
                 </legend>
                 <input
-                  id='instrument_code'
+                  id='department_code'
                   className='form-input w-36'
                   type='number'
                   step={1}
                   min={1}
-                  {...register('instrument_code')}
+                  {...register('department_code')}
                 />
               </fieldset>
-              {/* Instrumento pavadinimas */}
-              <fieldset className='border border-rose-950 p-2 rounded-lg w-4/6'>
+              {/* Skyriaus pavadinimas */}
+              <fieldset className='border border-rose-950 p-2 rounded-lg w-5/6'>
                 <legend className='px-3 text-rose-950 font-semibold'>
                   Pavadinimas
                 </legend>
                 <textarea
                   rows={3}
                   className='form-textarea w-full'
-                  id='instrument_name'
-                  {...register('instrument_name')}
-                />
-              </fieldset>
-              {/* Instrumento galiojimas */}
-              <fieldset className='border border-rose-950 p-2 rounded-lg w-1/6'>
-                <legend className='px-3 text-rose-950 font-semibold'>
-                  Galiojimas
-                </legend>
-                <input
-                  id=''
-                  className='form-input w-36'
-                  type='number'
-                  step={1}
-                  min={1}
-                  {...register('instrument_exp')}
+                  id='department_name'
+                  {...register('department_name')}
                 />
               </fieldset>
             </div>
             {/* Validacijos klaidų blokas */}
             <div className='flex flex-col gap-1'>
-              {errors.instrument_code && (
+              {errors.department_code && (
                 <span className='text-sm text-rose-500'>
-                  {errors.instrument_code.message}
+                  {errors.department_code.message}
                 </span>
               )}
-              {errors.instrument_name && (
+              {errors.department_name && (
                 <span className='text-sm text-rose-500'>
-                  {errors.instrument_name.message}
-                </span>
-              )}
-              {errors.instrument_exp && (
-                <span className='text-sm text-rose-500'>
-                  {errors.instrument_exp.message}
+                  {errors.department_name.message}
                 </span>
               )}
             </div>

@@ -25,13 +25,14 @@ model Instrument {
 model Department {
   id              Int    @id @default(autoincrement())
   department_name String
-  department_code String @unique
+  department_code Int    @unique
 
   items SterilizationCycleItem[]
 }
 
 model Sterilizer {
   id              Int    @id @default(autoincrement())
+  sterilizer_code Int    @unique
   sterilizer_name String @db.VarChar(100)
 
   cycles SterilizationCycle[]

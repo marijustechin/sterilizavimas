@@ -3,14 +3,14 @@ import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { AdminLayout } from './layouts/AdminLayout';
 import { AdminPage } from './pages/admin/AdminPage';
-import { SterilizationPage } from './pages/SterilizationPage';
+import { SterilizationPage } from './pages/sterilization/SterilizationPage';
 import { SterilizationLayout } from './layouts/SterilizationLayout';
 import { useAppDispatch, useAppSelector } from './store/store';
 import { checkAuth, selectIsInitialized } from './store/features/authSlice';
 import { useEffect } from 'react';
-import { AdminInstruments } from './pages/admin/AdminInstruments';
-import { AdminDepartments } from './pages/admin/AdminDepartments';
-import { AdminSterilizers } from './pages/admin/AdminSterilizers';
+import { AdminInstruments } from './pages/sterilization/AdminInstruments';
+import { AdminDepartments } from './pages/sterilization/AdminDepartments';
+import { AdminSterilizers } from './pages/sterilization/AdminSterilizers';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -36,12 +36,21 @@ function App() {
         </Route>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminPage />} />
-          <Route path='/admin/instrumentai' element={<AdminInstruments />} />
-          <Route path='/admin/skyriai' element={<AdminDepartments />} />
-          <Route path='/admin/sterilizatoriai' element={<AdminSterilizers />} />
         </Route>
         <Route path='/sterilizavimas' element={<SterilizationLayout />}>
           <Route index element={<SterilizationPage />} />
+          <Route
+            path='/sterilizavimas/sterilizatoriai'
+            element={<AdminSterilizers />}
+          />
+          <Route
+            path='/sterilizavimas/instrumentai'
+            element={<AdminInstruments />}
+          />
+          <Route
+            path='/sterilizavimas/skyriai'
+            element={<AdminDepartments />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

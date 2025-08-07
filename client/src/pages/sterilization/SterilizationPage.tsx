@@ -5,35 +5,36 @@ import {
   pointerWithin,
 } from '@dnd-kit/core';
 
-import { SelectSterilizer } from '../components/sterilization/SelectSterilizer';
-import { TopMenu } from '../components/sterilization/TopMenu';
-import { useAppDispatch, useAppSelector } from '../store/store';
+import { SelectSterilizer } from '../../components/sterilization/SelectSterilizer';
+import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   getInstruments,
   selectInstruments,
-} from '../store/features/instrumentSlice';
+  selectInstrumentStatus,
+} from '../../store/features/instrumentSlice';
 import {
   getDepartments,
   selectDepartements,
-} from '../store/features/departmentSlice';
+  selectDepartmentStatus,
+} from '../../store/features/departmentSlice';
 import { useEffect } from 'react';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import toast from 'react-hot-toast';
-import { DragableInstrument } from '../components/sterilization/DragableInstrument';
-import type { TInstrument } from '../types';
-import { DragableDepartment } from '../components/sterilization/DragableDepartment';
-import { DroppableSterilizer } from '../components/sterilization/DroppableSterilizer';
+import { DragableInstrument } from '../../components/sterilization/DragableInstrument';
+import type { TInstrument } from '../../types';
+import { DragableDepartment } from '../../components/sterilization/DragableDepartment';
+import { DroppableSterilizer } from '../../components/sterilization/DroppableSterilizer';
 import {
   addDepartmentToSterilizer,
   addInstrumentToDepartment,
   selectedDepartments,
   selectedInstruments,
   selectPrintingPreview,
-} from '../store/features/sterilizationSlice';
-import { StickerList } from '../components/sticker/StickerList';
+} from '../../store/features/sterilizationSlice';
+import { StickerList } from '../../components/sticker/StickerList';
 
 // //////////////////////////////////////
 export interface IInstrumentInDepartment {
@@ -48,19 +49,23 @@ export const SterilizationPage = () => {
   const allInstruments = useAppSelector(selectInstruments);
   const allDepartments = useAppSelector(selectDepartements);
 
+  // Ar duomenų gavimo indikatoriai
+  const departmentStatus = useAppSelector(selectDepartmentStatus);
+  const instrumentStatus = useAppSelector(selectInstrumentStatus);
+
   // Ši būsena laikys skyrius, kurie yra "sterilizatoriuje"
   const departmentsSelected = useAppSelector(selectedDepartments);
   const instrumentsSelected = useAppSelector(selectedInstruments);
   const printingPreview = useAppSelector(selectPrintingPreview);
 
   useEffect(() => {
-    if (allInstruments.length === 0) {
+    if (instrumentStatus === 'idle') {
       dispatch(getInstruments());
     }
-    if (!allDepartments) {
+    if (departmentStatus === 'idle') {
       dispatch(getDepartments());
     }
-  }, [dispatch, allInstruments, allDepartments]);
+  }, [dispatch, instrumentStatus, departmentStatus]);
 
   const handleDragEndN = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -151,8 +156,7 @@ export const SterilizationPage = () => {
   };
 
   return (
-    <main className='max-w-7xl mx-auto flex-col gap-2'>
-      <TopMenu />
+    <main className='flex-col gap-2'>
       {printingPreview ? (
         <StickerList />
       ) : (

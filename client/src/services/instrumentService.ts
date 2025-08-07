@@ -2,8 +2,8 @@ import $axios from '../config/axios';
 import type { TInstrument, TNewInstrument } from '../types';
 
 export default class InstrumentService {
-  static async getAll(): Promise<TInstrument[]> {
-    const response = await $axios.get('/instrument');
+  static async getAll(query: string): Promise<TInstrument[]> {
+    const response = await $axios.get(`/instrument${query}`);
 
     return response.data;
   }

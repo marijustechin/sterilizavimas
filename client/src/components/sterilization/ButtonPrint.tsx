@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import SterilizationService from '../../services/sterilizationService';
 import type { TSterilizationCyclePayload } from '../../types';
 import { selectUser } from '../../store/features/authSlice';
+import { useLocation } from 'react-router';
 
 export const ButtonPrint = () => {
   const dispatch = useAppDispatch();
@@ -19,6 +20,8 @@ export const ButtonPrint = () => {
   const instruments = useAppSelector(selectedInstruments);
   const user = useAppSelector(selectUser);
   const departments = useAppSelector(selectedDepartments);
+
+  const location = useLocation();
 
   const handlePrintAction = async () => {
     if (!sterilizerId) {
@@ -75,14 +78,18 @@ export const ButtonPrint = () => {
     // cia reikes naudoti window print?
   };
 
-  return (
-    <button
-      type='button'
-      className='flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500'
-      onClick={handlePrintAction}
-    >
-      <MdOutlinePrint size={20} />
-      Spausdinti
-    </button>
-  );
+  if (location.pathname === '/sterilizavimas') {
+    return (
+      <button
+        type='button'
+        className='flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500'
+        onClick={handlePrintAction}
+      >
+        <MdOutlinePrint size={20} />
+        Spausdinti
+      </button>
+    );
+  } else {
+    return;
+  }
 };

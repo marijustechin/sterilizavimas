@@ -10,7 +10,7 @@ export const Header = () => {
     <header className='flex gap-4 items-center justify-center border-b border-rose-800/30 p-3 mb-3'>
       <img
         className='w-12'
-        src='favicons/android-chrome-192x192.png'
+        src='/favicons/android-chrome-192x192.png'
         alt='Logotipas'
       />
       <div className='flex flex-col'>

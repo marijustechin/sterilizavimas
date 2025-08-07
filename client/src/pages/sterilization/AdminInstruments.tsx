@@ -3,9 +3,9 @@ import {
   deleteInstrument,
   getInstruments,
   selectInstruments,
+  selectInstrumentStatus,
 } from '../../store/features/instrumentSlice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
-import { Search } from '../../components/Search';
 import { ConfirmationModal } from '../../components/ConfirmationModal';
 import type { TInstrument } from '../../types';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import { AddEditInstrumentForm } from '../../components/admin/AddEditInstrumentF
 export const AdminInstruments = () => {
   const dispatch = useAppDispatch();
   const instruments = useAppSelector(selectInstruments);
+  const instrumentStatus = useAppSelector(selectInstrumentStatus);
 
   // delete variables
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -29,8 +30,8 @@ export const AdminInstruments = () => {
   );
 
   useEffect(() => {
-    if (instruments.length === 0) dispatch(getInstruments());
-  }, [dispatch, instruments]);
+    if (instrumentStatus === 'idle') dispatch(getInstruments());
+  }, [dispatch, instrumentStatus]);
 
   const handleDeleteInstrument = async () => {
     setConfirmationOpen(false);
@@ -77,15 +78,15 @@ export const AdminInstruments = () => {
 
   return (
     <main>
-      <div className='flex gap-3'>
+      <div className='flex gap-3 items-center'>
+        <h1 className='text-3xl font-semibold'>Instrumentai</h1>
         <button className='btn-amber' type='button' onClick={handleAddNewClick}>
           ➕ Pridėti naują
         </button>
-        <Search placeholderText='Ieškoti instrumentų...' onSearch={() => {}} />
       </div>
 
-      <table>
-        <thead>
+      <table className='w-full text-left mt-5'>
+        <thead className='uppercase bg-slate-200 text-center'>
           <tr>
             <th>Kodas</th>
             <th>Pavadinimas</th>
@@ -108,10 +109,10 @@ export const AdminInstruments = () => {
                 // bet dėl viso pikto pridedu kodą, kuris irgi turi būti unikalus
                 key={instrument.instrument_name + instrument.instrument_code}
               >
-                <td>{instrument.instrument_code}</td>
+                <td className='text-center'>{instrument.instrument_code}</td>
                 <td>{instrument.instrument_name}</td>
-                <td>{instrument.instrument_exp}</td>
-                <td className='flex gap-2 py-1'>
+                <td className='text-center'>{instrument.instrument_exp}</td>
+                <td className='flex gap-2 py-1 items-center justify-center'>
                   <button
                     className='btn-emerald'
                     type='button'
