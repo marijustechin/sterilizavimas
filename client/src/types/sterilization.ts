@@ -39,10 +39,15 @@ export type TNewDepartment = {
   department_name: string;
 };
 
+export type TInstrumentsOfDepartment = {
+  departmentId: number;
+  department_code: number;
+  instruments: TInstrument[];
+};
+
 export type TSterilizationCyclePayload = {
   sterilizerId: number;
   userId: string;
   cycleNumber: number;
-  departments: TDepartment[];
-  instruments: ISelectedInstrument[];
+  departmentsAndInstruments: TInstrumentsOfDepartment[];
 };

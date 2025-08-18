@@ -48,12 +48,11 @@ model Jwt {
 }
 
 model SterilizationCycle {
-  id                       Int      @id @default(autoincrement())
-  user_id                  String
-  sterilizer_id            Int
-  cycle_number             Int
-  sterilization_date       DateTime @default(now())
-  expiration_period_months Int
+  id                 Int      @id @default(autoincrement())
+  user_id            String
+  sterilizer_id      Int
+  cycle_number       Int
+  sterilization_date DateTime @default(now())
 
   sterilizer Sterilizer               @relation(fields: [sterilizer_id], references: [id])
   items      SterilizationCycleItem[]
@@ -67,7 +66,6 @@ model SterilizationCycleItem {
   cycle_id      Int
   instrument_id Int
   department_id Int
-  qty           Int @default(1)
 
   cycle      SterilizationCycle @relation(fields: [cycle_id], references: [id])
   instrument Instrument         @relation(fields: [instrument_id], references: [id])

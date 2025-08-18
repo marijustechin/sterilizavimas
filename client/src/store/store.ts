@@ -7,6 +7,7 @@ import sterilizerReducer from './features/sterilizerSlice';
 import instrumentsReducer from './features/instrumentSlice';
 import departmentReducer from './features/departmentSlice';
 import sterilizationReducer from './features/sterilizationSlice';
+import adminReducer from './features/adminSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     instruments: instrumentsReducer,
     department: departmentReducer,
     sterilization: sterilizationReducer,
+    admin: adminReducer,
   },
 });
 

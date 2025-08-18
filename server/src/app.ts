@@ -9,6 +9,7 @@ import departmentRouter from './routers/departmentRouter';
 import instrumentRouter from './routers/instrumentRouter';
 import sterilizerRouter from './routers/sterilizerRouter';
 import sterilizationRouter from './routers/sterilizationRouter';
+import adminRouter from './routers/adminRouter';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/v1/department', departmentRouter);
 app.use('/api/v1/instrument', instrumentRouter);
 app.use('/api/v1/sterilizer', sterilizerRouter);
 app.use('/api/v1/sterilization', sterilizationRouter);
+app.use('/api/v1/admin', adminRouter);
 
 app.use(errorMiddleware);
 
