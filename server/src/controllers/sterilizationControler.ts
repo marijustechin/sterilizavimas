@@ -29,6 +29,10 @@ export default class SterilizationController {
     try {
       const sterilizationCycleData: TSterilizationCyclePayload = req.body;
 
+      // čia bus vykdoma duomenų validacija.
+      // Jei viskas ok, kviečiamas servisas,
+      // jei ne throw ApiError
+
       const result = await SterilizationService.saveSterilizationCycle(
         sterilizationCycleData
       );

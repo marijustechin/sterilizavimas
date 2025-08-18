@@ -3,7 +3,6 @@ import HelperService from '../../services/helperService';
 import type { RootState } from '../store';
 import type { TNewSterilizer, TSterilizer } from '../../types';
 import SterilizerService from '../../services/sterilizerService';
-import { statsBuffer } from 'framer-motion';
 
 interface ISterilizerState {
   sterilizers: TSterilizer[];
@@ -68,7 +67,6 @@ export const deleteSterilizer = createAsyncThunk<TSterilizer, { id: number }>(
   'sterilizers/deleteSterilizer',
   async ({ id }, { rejectWithValue }) => {
     try {
-      console.log(id);
       const response = await SterilizerService.delete(id);
 
       return response;

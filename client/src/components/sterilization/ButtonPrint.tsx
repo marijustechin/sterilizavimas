@@ -2,7 +2,7 @@ import { MdOutlinePrint } from 'react-icons/md';
 import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   fetchNextCycleNumber,
-  selectedDepartments,
+  resetSterilizationState,
   selectedInstruments,
   selectSelectedSterilizerId,
   setMessage,
@@ -10,18 +10,27 @@ import {
 } from '../../store/features/sterilizationSlice';
 import toast from 'react-hot-toast';
 import SterilizationService from '../../services/sterilizationService';
-import type { TSterilizationCyclePayload } from '../../types';
+import type {
+  TInstrument,
+  TInstrumentsOfDepartment,
+  TSterilizationCyclePayload,
+} from '../../types';
 import { selectUser } from '../../store/features/authSlice';
 import { useLocation } from 'react-router';
+import HelperService from '../../services/helperService';
+import { selectDepartements } from '../../store/features/departmentSlice';
+import { useState } from 'react';
 
 export const ButtonPrint = () => {
   const dispatch = useAppDispatch();
   const sterilizerId = useAppSelector(selectSelectedSterilizerId);
   const instruments = useAppSelector(selectedInstruments);
+  const departments = useAppSelector(selectDepartements);
   const user = useAppSelector(selectUser);
-  const departments = useAppSelector(selectedDepartments);
 
   const location = useLocation();
+
+  const [printDisabled, setPrintDisabled] = useState<boolean>(false);
 
   const handlePrintAction = async () => {
     if (!sterilizerId) {
@@ -43,44 +52,74 @@ export const ButtonPrint = () => {
     }
 
     // visi sterilizavimo ciklo duomenys
+    const dropzoneRegex = /^department-dropzone-(\d+)$/;
+
+    const departmentsAndInstruments: TInstrumentsOfDepartment[] =
+      instruments.reduce<
+        {
+          departmentId: number;
+          department_code: number;
+          instruments: TInstrument[];
+        }[]
+      >((acc, instrument) => {
+        const match = dropzoneRegex.exec(instrument.departmentId);
+        if (match) {
+          const departmentId = Number(match[1]);
+          // Surandame atitinkamą skyriaus objektą iš departments masyvo
+          const departmentInfo = departments.find((d) => d.id === departmentId);
+
+          if (departmentInfo) {
+            let department = acc.find((d) => d.departmentId === departmentId);
+            if (!department) {
+              department = {
+                departmentId,
+                department_code: departmentInfo.department_code, // Pridedame department_code
+                instruments: [],
+              };
+              acc.push(department);
+            }
+            department.instruments.push(instrument.instrument);
+          }
+        }
+        return acc;
+      }, []);
+
     const sterilizationCycleData: TSterilizationCyclePayload = {
       sterilizerId,
       userId: user.userId,
-      departments,
-      instruments,
       cycleNumber: await dispatch(fetchNextCycleNumber(sterilizerId)).unwrap(),
+      departmentsAndInstruments: departmentsAndInstruments,
     };
-    ///////////////////////////////////////////
 
+    ///////////////////////////////////////////
+    setPrintDisabled(true);
     // 1. Sugeneruojame lipdukus
-    dispatch(setMessage({ message: 'Generuojami lipdukai...' }));
     dispatch(setPrintingPreview({ value: true }));
 
-    // 2. Įrašome duomenis į DB
-    dispatch(setMessage({ message: 'Duomenys įrašomi į duomenų bazę...' }));
-    const response = await SterilizationService.saveSterilizationCycle(
-      sterilizationCycleData
+    // 2. Siunčiame duomenis į backend
+    // spausdinimui ir įrašymui į DB
+    dispatch(
+      setMessage({ message: 'Vyksta spausdinimas ir įrašymas duomenų bazę...' })
     );
 
-    // dar nesugalvojau, koks bus response. Tikriausiai reikia tikrinti pagal koda, t.y. kad butu 201
-    // ir kokia prasmė rodyti skirtingus infoMessage, jei viskas įvyksta taip greitai, kad nespėju pamatyti :)
-    if (response === 'sekmingas irasymas') {
-      dispatch(
-        setMessage({
-          message: 'Duomenys sėkmingai įrašyti...',
-        })
-      );
-    } else {
-      toast.error('Duomenų įrašymo klaida ');
+    try {
+      await SterilizationService.saveSterilizationCycle(sterilizationCycleData);
+
+      // dar čia reikia nunulinti redux būseną
+      toast.success('Duomenys sėkmingai įrašyti');
+      dispatch(setMessage({ message: '' }));
+      dispatch(resetSterilizationState());
+    } catch (error) {
+      toast.error(HelperService.errorToString(error));
     }
 
-    // 3. Spausdiname
-    // cia reikes naudoti window print?
+    setPrintDisabled(false);
   };
 
   if (location.pathname === '/sterilizavimas') {
     return (
       <button
+        disabled={printDisabled}
         type='button'
         className='flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500'
         onClick={handlePrintAction}

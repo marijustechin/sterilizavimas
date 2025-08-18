@@ -39,4 +39,8 @@ export default class ApiError extends Error {
   static BadRequest(message: string, errors: unknown[] = []) {
     return new ApiError(StatusCodes.BAD_REQUEST, message, errors);
   }
+
+  static PrinterError(message: string, errors: unknown[] = []) {
+    return new ApiError(StatusCodes.SERVICE_UNAVAILABLE, message, errors);
+  }
 }

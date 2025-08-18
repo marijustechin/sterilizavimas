@@ -60,6 +60,14 @@ const sterilizationSlice = createSlice({
   name: 'sterilization',
   initialState,
   reducers: {
+    // reset sterilization state
+    resetSterilizationState: (state) => {
+      state.selectedSterilizerId = null;
+      state.currentCycleNumber = null;
+      state.departments = [];
+      state.instruments = [];
+      state.printingPreview = false;
+    },
     // set printing preview
     setPrintingPreview: (state, action: PayloadAction<{ value: boolean }>) => {
       state.printingPreview = action.payload.value;
@@ -152,6 +160,7 @@ export const {
   removeDepartmentFromSterilizer,
   setMessage,
   setPrintingPreview,
+  resetSterilizationState,
 } = sterilizationSlice.actions;
 
 export const selectedDepartments = (state: RootState) =>

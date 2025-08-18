@@ -4,10 +4,9 @@
 // Į QR kodą dedama tokia informacija, kad ją nuskaičius būtų gaunami iš duomenų bazės
 // duomenys konkrečiai idenfifikuojantys instrumentą ir jo dezinfekavimą
 
-import type { ISelectedInstrument } from '../../store/features/sterilizationSlice';
-import type { TDepartment } from '../../types';
+import type { ISelectedInstrument, TDepartment } from '../../types';
 
-import { format, addMonths } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import QRCode from 'react-qr-code';
 
 interface IStickerProps {
@@ -24,7 +23,7 @@ export const Sticker = ({
   department,
 }: IStickerProps) => {
   const today = new Date();
-  const dateEnd = addMonths(today, 6);
+  const dateEnd = addDays(today, instrument.instrument.instrument_exp);
   const formattedDateNow = format(today, 'yyyy-MM-dd');
   const formattedDateEnd = format(dateEnd, 'yyyy-MM-dd');
 
