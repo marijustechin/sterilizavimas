@@ -51,8 +51,6 @@ export default class SterilizationService {
         sterilizationCycleData
       );
 
-    console.log('saveRezult: ', saveResult);
-
     if (!saveResult.success)
       throw ApiError.BadRequest('Duomenų įrašymo klaida');
 

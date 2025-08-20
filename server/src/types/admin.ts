@@ -1,4 +1,4 @@
-import type { TDepartment, TInstrument } from './sterilization';
+import { TDepartment, TInstrument } from './sterilization';
 
 export type TAdminRecord = {
   id: number;

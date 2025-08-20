@@ -1,10 +1,28 @@
-import { Client } from 'ldapts';
+import { Client, EqualityFilter, OrFilter } from 'ldapts';
 import { stringify } from 'uuid';
 import ApiError from '../errors/apiErrors';
 import config from '../config/config';
 import { TldapUser } from 'types';
 
 export default class LdapService {
+  static convertUUIDToBinary(uuidStr: string): Buffer {
+    const hex = uuidStr.replace(/-/g, '').toLowerCase();
+    if (!/^[0-9a-f]{32}$/.test(hex)) {
+      throw new Error(`Blogas UUID formatas: ${uuidStr}`);
+    }
+    const d1 = parseInt(hex.slice(0, 8), 16);
+    const d2 = parseInt(hex.slice(8, 12), 16);
+    const d3 = parseInt(hex.slice(12, 16), 16);
+    const tail = hex.slice(16); // 16 hex simbolių = 8 baitai
+
+    const buf = Buffer.alloc(16);
+    buf.writeUInt32LE(d1, 0);
+    buf.writeUInt16LE(d2, 4);
+    buf.writeUInt16LE(d3, 6);
+    Buffer.from(tail, 'hex').copy(buf, 8);
+    return buf;
+  }
+
   /**
    * Role/Division extractor
    * @param dn string
@@ -147,6 +165,59 @@ export default class LdapService {
       );
     } finally {
       await client.unbind();
+    }
+  }
+
+  static async getDisplayNamesByUserIds(
+    userIds: string[]
+  ): Promise<Map<string, string>> {
+    const unique = Array.from(new Set(userIds.filter(Boolean)));
+    const map = new Map<string, string>();
+    if (unique.length === 0) return map;
+
+    const url = `ldap://${config.ldap.ldap_server}:389`;
+    const adminUser = `${config.ldap.ldap_domain}\\${config.ldap.ldap_user}`;
+    const adminPass = config.ldap.ldap_password;
+
+    const client = new Client({ url });
+    try {
+      await client.bind(adminUser, adminPass);
+
+      // RootDSE → tikras DN bazės vardas
+      const root = await client.search('', {
+        scope: 'base',
+        attributes: ['defaultNamingContext'],
+      });
+      const base = (root.searchEntries[0] as any)
+        ?.defaultNamingContext as string;
+
+      // Sudarom OR filtrą iš EqualityFilter(objectGUID=Buffer)
+      const eqs = unique.map(
+        (g) =>
+          new EqualityFilter({
+            attribute: 'objectGUID',
+            value: this.convertUUIDToBinary(g),
+          })
+      );
+      const or = new OrFilter({ filters: eqs });
+
+      const { searchEntries } = await client.search(base, {
+        scope: 'sub',
+        filter: or,
+        attributes: ['displayName', 'sAMAccountName', 'objectGUID'],
+        explicitBufferAttributes: ['objectGUID'],
+      });
+
+      for (const e of searchEntries as any[]) {
+        const guid = this.objectGUIDBufferToIDString(e.objectGUID); // UPPERCASE UUID
+        const name = (e.displayName as string) ?? (e.sAMAccountName as string);
+        if (guid && name) map.set(guid, name);
+      }
+      return map;
+    } finally {
+      try {
+        await client.unbind();
+      } catch {}
     }
   }
 }

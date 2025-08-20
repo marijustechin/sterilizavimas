@@ -125,7 +125,7 @@ export const ButtonPrint = () => {
         onClick={handlePrintAction}
       >
         <MdOutlinePrint size={20} />
-        Spausdinti
+        Spausdinti ({instruments.length})
       </button>
     );
   } else {
