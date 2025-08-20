@@ -71,18 +71,18 @@ model SterilizationCycleItem {
   instrument Instrument         @relation(fields: [instrument_id], references: [id])
   department Department         @relation(fields: [department_id], references: [id])
 
-  InstrumentUsage InstrumentUsage[]
+  // 1:1 – instrumentas šiame cikle gali būti panaudotas tik kartą
+  usage InstrumentUsage? // <-- vietoje masyvo: vienas arba nėra
 }
 
 model InstrumentUsage {
   id              Int      @id @default(autoincrement())
-  cycle_item_id   Int
-  used_by_user_id String // čia bus objectGUID string
+  cycle_item_id   Int      @unique // <-- užtikrina „tik kartą“
+  used_by_user_id String
   patient_id      String
   usage_timestamp DateTime @default(now())
 
   cycle_item SterilizationCycleItem @relation(fields: [cycle_item_id], references: [id])
-  // no @relation to User
 
   @@index([used_by_user_id])
 }

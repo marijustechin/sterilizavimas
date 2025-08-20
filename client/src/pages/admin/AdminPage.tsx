@@ -1,9 +1,35 @@
+import { useEffect } from 'react';
 import { Pagination } from '../../components/Pagination';
 import { Search } from '../../components/Search';
+import {
+  getCurrentPage,
+  getCycleRecords,
+  getTotalPages,
+  selectAdminStatus,
+  selectCycleRecords,
+  setCurrentPage,
+} from '../../store/features/adminSlice';
+import { useAppDispatch, useAppSelector } from '../../store/store';
+import { MdMore } from 'react-icons/md';
 
 export const AdminPage = () => {
+  const dispatch = useAppDispatch();
+  const cycleRecords = useAppSelector(selectCycleRecords);
+  const adminStatus = useAppSelector(selectAdminStatus);
+  const totalPages = useAppSelector(getTotalPages);
+  const currentPage = useAppSelector(getCurrentPage);
+
+  useEffect(() => {
+    if (adminStatus === 'idle') dispatch(getCycleRecords());
+  }, [adminStatus, dispatch]);
+
   const onSearch = (searchText: string) => {
     console.log(searchText);
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setCurrentPage({ current: page }));
+    dispatch(getCycleRecords());
   };
 
   return (
@@ -27,10 +53,30 @@ export const AdminPage = () => {
               <th>-</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            {cycleRecords.map((record) => (
+              <tr key={record.id}>
+                <td>{record.instrument.instrument_name}</td>
+                <td>{record.department.department_name}</td>
+                <td className='text-center'>{record.sterilizedAt}</td>
+                <td className='text-center'>2025-11-12</td>
+                <td>{record.sterilizedBy}</td>
+                <td className='text-center'>Paciento ID</td>
+                <td>
+                  <button>
+                    <MdMore className='text-red-950' size={24} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </section>
-      <Pagination />
+      <Pagination
+        onChange={(current) => handlePageChange(current)}
+        totalPages={totalPages}
+        currentPage={currentPage}
+      />
     </main>
   );
 };
