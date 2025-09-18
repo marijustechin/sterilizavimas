@@ -2,13 +2,26 @@ import * as net from 'net';
 import config from '../config/config';
 import { TPrinterStatus, TSterilizationCyclePayload } from 'types';
 import { addDays, format } from 'date-fns';
+import { prisma } from '../config/prisma';
+import ApiError from '../errors/apiErrors';
 
 export default class PrintingService {
   // patikriname ar spausdintuvas pasirengęs darbui
-  static async CheckPrinterStatus(): Promise<{
+  static async CheckPrinterStatus(printerId: number): Promise<{
     status: TPrinterStatus;
     message: string;
   }> {
+    const printer = await prisma.printer.findUnique({
+      where: {
+        id: printerId,
+      },
+    });
+
+    if (!printer)
+      throw ApiError.NotFound(
+        `Spausdintuvo ID:${printerId} duomenų bazėje nepavyko rasti`
+      );
+
     return new Promise((resolve) => {
       const client = new net.Socket();
       let resolved = false;
@@ -37,10 +50,7 @@ export default class PrintingService {
         finish('error', 'Nepavyko prisijungti prie spausdintuvo');
       });
 
-      client.connect(
-        Number(config.printer.printer_port),
-        config.printer.printer_host
-      );
+      client.connect(printer.port, printer.ip_address);
     });
   }
 
@@ -50,12 +60,22 @@ export default class PrintingService {
     recordId: number
   ): Promise<boolean> {
     const zpl = this.buildZplFromPayload(labelData, recordId);
+    const printer = await prisma.printer.findUnique({
+      where: {
+        id: labelData.printerId,
+      },
+    });
+
+    if (!printer)
+      throw ApiError.NotFound(
+        `Spausdintuvo ID:${labelData.printerId} duomenų bazėje nepavyko rasti`
+      );
 
     return new Promise((resolve, reject) => {
       const client = net.createConnection(
         {
-          host: config.printer.printer_host,
-          port: Number(config.printer.printer_port),
+          host: printer.ip_address,
+          port: printer.port,
         },
         () => {
           client.write(zpl);

@@ -46,6 +46,7 @@ export type TInstrumentsOfDepartment = {
 };
 
 export type TSterilizationCyclePayload = {
+  printerId: number;
   sterilizerId: number;
   userId: string;
   cycleNumber: number;

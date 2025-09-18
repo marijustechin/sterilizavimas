@@ -8,7 +8,6 @@ import {
 } from '../../store/features/sterilizerSlice';
 import {
   fetchNextCycleNumber,
-  selectCurrentCycleNumber,
   setSelectedSterilizer,
 } from '../../store/features/sterilizationSlice';
 
