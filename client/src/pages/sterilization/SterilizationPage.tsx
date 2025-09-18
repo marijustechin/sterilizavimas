@@ -35,6 +35,7 @@ import {
   selectPrintingPreview,
 } from '../../store/features/sterilizationSlice';
 import { StickerList } from '../../components/sticker/StickerList';
+import { SelectPrinter } from '../../components/sterilization/SelectPrinter';
 
 // //////////////////////////////////////
 export interface IInstrumentInDepartment {
@@ -204,7 +205,11 @@ export const SterilizationPage = () => {
             </section>
             {/* Sterilizatorius ////////////////////////////////////////////////////////////// */}
             <section className='w-2/4 flex-col gap-2'>
-              <SelectSterilizer />
+              <div className='flex gap-3'>
+                <SelectSterilizer />
+                <SelectPrinter />
+              </div>
+
               <div className='p-1 rounded-lg mt-1 min-h-56'>
                 <DroppableSterilizer
                   instruments={instrumentsSelected}

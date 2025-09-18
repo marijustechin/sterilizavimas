@@ -1,3 +1,5 @@
+import { selectCurrentCycleNumber } from '../../store/features/sterilizationSlice';
+import { useAppSelector } from '../../store/store';
 import { ButtonPrint } from './ButtonPrint';
 import { Link, useLocation } from 'react-router';
 
@@ -10,6 +12,8 @@ export const TopMenu = () => {
   const location = useLocation();
   const currentDate = new Date().toISOString().slice(0, 10);
   const isActive = (path: string) => location.pathname === path;
+
+  const cycleNumber = useAppSelector(selectCurrentCycleNumber);
 
   const topMenuLinks: ITopMenuLink[] = [
     { name: 'Sterilizavimas', link: '/sterilizavimas' },
@@ -26,6 +30,11 @@ export const TopMenu = () => {
           Data: <span className='text-sm font-semibold'>{currentDate}</span>
         </div>
         <ButtonPrint />
+        {location.pathname === '/sterilizavimas' && (
+          <h3>
+            Partijos Nr. <span className='font-semibold'>{cycleNumber}</span>
+          </h3>
+        )}
       </div>
 
       {/* Admin */}

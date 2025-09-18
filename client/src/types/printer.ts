@@ -1,5 +1,3 @@
-export type TPrinterStatus = 'ready' | 'timeout' | 'error';
-
 export type TPrinter = {
   id: number;
   name: string;

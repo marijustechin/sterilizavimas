@@ -1,7 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
-import type { TDepartment } from '../../types';
+import type { ISelectedInstrument, TDepartment } from '../../types';
 import { DroppableDepartment } from './DroppableDepartment';
-import type { ISelectedInstrument } from '../../store/features/sterilizationSlice';
 
 interface DroppableSterilizerProps {
   selectedDepartments: TDepartment[];

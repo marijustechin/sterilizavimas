@@ -143,6 +143,7 @@ export default class LdapService {
       }
 
       const userEntry = searchEntries[0] as TldapUser;
+      console.log(userEntry);
 
       const displayName = userEntry.displayName;
       const userId = this.objectGUIDBufferToIDString(userEntry.objectGUID);

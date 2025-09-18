@@ -11,6 +11,9 @@ import { useEffect } from 'react';
 import { AdminInstruments } from './pages/sterilization/AdminInstruments';
 import { AdminDepartments } from './pages/sterilization/AdminDepartments';
 import { AdminSterilizers } from './pages/sterilization/AdminSterilizers';
+import { MedicLayout } from './layouts/MedicLayout';
+import { MedicPage } from './pages/MedicPage';
+import { PrintersPage } from './pages/admin/PrintersPage';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -36,6 +39,10 @@ function App() {
         </Route>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminPage />} />
+          <Route path='/admin/spausdintuvai' element={<PrintersPage />} />
+        </Route>
+        <Route path='/nuskaitymas' element={<MedicLayout />}>
+          <Route index element={<MedicPage />} />
         </Route>
         <Route path='/sterilizavimas' element={<SterilizationLayout />}>
           <Route index element={<SterilizationPage />} />

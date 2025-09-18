@@ -1,6 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
-import type { TDepartment } from '../../types';
-import { MdDeleteForever } from 'react-icons/md';
+import type { ISelectedInstrument, TDepartment } from '../../types';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -9,7 +8,6 @@ import { useAppDispatch } from '../../store/store';
 import {
   removeDepartmentFromSterilizer,
   removeInstrumentFromDepartment,
-  type ISelectedInstrument,
 } from '../../store/features/sterilizationSlice';
 
 interface DroppableDepartmentProps {
