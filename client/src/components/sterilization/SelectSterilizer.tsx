@@ -17,8 +17,6 @@ export const SelectSterilizer = () => {
   const sterilizers = useAppSelector(selectSterilizer);
   const sterilizerStatus = useAppSelector(selectSterilizerStatus);
 
-  const cycleNumber = useAppSelector(selectCurrentCycleNumber);
-
   useEffect(() => {
     if (sterilizerStatus === 'idle') dispatch(getSterilizers());
   }, [dispatch, sterilizerStatus]);
@@ -46,9 +44,6 @@ export const SelectSterilizer = () => {
           </option>
         ))}
       </select>
-      <h3>
-        Partijos Nr. <span className='font-semibold'>{cycleNumber}</span>
-      </h3>
     </div>
   );
 };

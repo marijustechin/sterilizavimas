@@ -1,13 +1,11 @@
 import { Outlet } from 'react-router';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { AdminMenu } from '../components/admin/AdminMenu';
 
-export const AdminLayout = () => {
+export const MedicLayout = () => {
   return (
     <div className='max-w-7xl mx-auto'>
       <Header />
-      <AdminMenu />
       <Outlet />
       <Footer />
     </div>

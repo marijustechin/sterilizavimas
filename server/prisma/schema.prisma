@@ -86,3 +86,14 @@ model InstrumentUsage {
 
   @@index([used_by_user_id])
 }
+
+model Printer {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  ip_address String   @db.VarChar(15)
+  port       Int
+  active     Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  @@unique([ip_address, port])
+}

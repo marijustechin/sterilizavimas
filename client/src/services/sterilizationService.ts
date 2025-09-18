@@ -16,8 +16,6 @@ export default class SterilizationService {
       sterilizationCycleData
     );
 
-    // gal man grąžinti tik kodą 201 ???
-    console.log(response.data);
     return response.data;
   }
 }
