@@ -9,43 +9,37 @@ import type { TPrinter } from '../../types';
 
 export const SelectPrinter = () => {
   const dispatch = useAppDispatch();
-  const status = useAppSelector(selectPrinterStatus); // 'idle' | 'loading' | 'succeeded' | 'failed'
-  const printers: TPrinter[] = useAppSelector(selectActivePrinter); // tik aktyvūs
+  const status = useAppSelector(selectPrinterStatus);
+  const printers: TPrinter[] = useAppSelector(selectActivePrinter);
   const [selectedPrinter, setSelectedPrinter] = useState<number | ''>('');
 
-  // 1) fetch
+  // 1. Jei nėra, iš db atsinešame spausdintuvus į redux
   useEffect(() => {
     if (status === 'idle') dispatch(getPrinters());
   }, [dispatch, status]);
 
-  // 2) inicializacija iš localStorage
+  // 2. Patikriname localStorage ir aktyvių spausdintuvų sąrašą
   useEffect(() => {
-    const saved = localStorage.getItem('selectedPrinter');
-    if (saved) setSelectedPrinter(Number(saved));
-  }, []);
+    // Vykdome tik kai spausdintuvai įkelti
+    if (printers.length > 0) {
+      const saved = localStorage.getItem('selectedPrinter');
+      const savedId = saved ? Number(saved) : null;
+      const exists = savedId && printers.some((p) => p.id === savedId);
 
-  // 3) validacija kai pasikeičia aktyvių sąrašas
-  useEffect(() => {
-    if (printers.length === 0) {
-      // nėra aktyvių – išvalom
-      if (selectedPrinter !== '') setSelectedPrinter('');
-      return;
-    }
-
-    // jei turimas ID nebegalioja – parenkam pagal taisykles
-    const exists =
-      selectedPrinter !== '' && printers.some((p) => p.id === selectedPrinter);
-    if (!exists) {
-      if (printers.length === 1) {
-        setSelectedPrinter(printers[0].id); // vienas aktyvus – auto select
+      if (exists) {
+        setSelectedPrinter(savedId);
+      } else if (printers.length === 1) {
+        setSelectedPrinter(printers[0].id);
         localStorage.setItem('selectedPrinter', String(printers[0].id));
       } else {
-        setSelectedPrinter(''); // daug aktyvių – tegul pasirenka
+        setSelectedPrinter('');
         localStorage.removeItem('selectedPrinter');
       }
     }
-  }, [printers, selectedPrinter]);
+  }, [printers]);
 
+  // Kai naudotojas pasirenka spausdintuvą,
+  // įrašome spausdintuvo ID į localStorage
   const onSelectPrinter = (id: number) => {
     setSelectedPrinter(id);
     localStorage.setItem('selectedPrinter', String(id));
@@ -62,7 +56,7 @@ export const SelectPrinter = () => {
       onChange={(e) => onSelectPrinter(Number(e.target.value))}
     >
       <option value='' disabled>
-        {status === 'loading' ? 'Kraunama…' : 'Pasirinkite spausdintuvą'}
+        {status === 'loading' ? 'Įkeliama…' : 'Pasirinkite spausdintuvą'}
       </option>
       {printers.map((p) => (
         <option key={p.id} value={p.id}>

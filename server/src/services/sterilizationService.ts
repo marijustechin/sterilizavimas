@@ -40,7 +40,9 @@ export default class SterilizationService {
     }
 
     // 2. Patikriname spausdintuvo būseną
-    const printerStatus = await PrintingService.CheckPrinterStatus();
+    const printerStatus = await PrintingService.CheckPrinterStatus(
+      sterilizationCycleData.printerId
+    );
 
     if (printerStatus.status !== 'ready')
       throw ApiError.PrinterError(printerStatus.message);

@@ -27,6 +27,7 @@ export const ButtonPrint = () => {
   const instruments = useAppSelector(selectedInstruments);
   const departments = useAppSelector(selectDepartements);
   const user = useAppSelector(selectUser);
+  const printerId: number = Number(localStorage.getItem('selectedPrinter'));
 
   const location = useLocation();
 
@@ -48,6 +49,13 @@ export const ButtonPrint = () => {
       // kad nemestų klaidos typescript inicijuojant
       // sterilizationCycleData.userId
       toast.error('Neprisijungęs naudotojas');
+      return;
+    }
+
+    if (!printerId) {
+      toast.error(
+        'Nesukonfigūruotas spausdintuvas. Prašome pasirinkti spausdintuvą arba kreiptis į administratorių'
+      );
       return;
     }
 
@@ -85,6 +93,7 @@ export const ButtonPrint = () => {
       }, []);
 
     const sterilizationCycleData: TSterilizationCyclePayload = {
+      printerId,
       sterilizerId,
       userId: user.userId,
       cycleNumber: await dispatch(fetchNextCycleNumber(sterilizerId)).unwrap(),
