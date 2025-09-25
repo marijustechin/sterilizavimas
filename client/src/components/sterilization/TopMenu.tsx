@@ -23,9 +23,9 @@ export const TopMenu = () => {
   ];
 
   return (
-    <div className='flex items-center justify-start gap-4 mb-2 bg-gray-200 rounded-lg py-1 px-2'>
+    <div className='flex items-center justify-between gap-4 mb-2 bg-gray-200 rounded-lg py-1 px-2'>
       {/* Data */}
-      <div className='w-4/12 flex gap-5 items-center justify-start'>
+      <div className='flex gap-5 items-center justify-start'>
         <div>
           Data: <span className='text-sm font-semibold'>{currentDate}</span>
         </div>
@@ -38,7 +38,7 @@ export const TopMenu = () => {
       </div>
 
       {/* Admin */}
-      <div className='w-8/12 flex items-center justify-end gap-5'>
+      <div className='flex items-center justify-end gap-5'>
         <div className='flex gap-3 items-center'>
           {topMenuLinks.map((link) => (
             <Link
