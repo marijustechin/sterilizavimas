@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import InstrumentService from '../services/instrumentService';
+import { NextFunction, Request, Response } from "express";
+import InstrumentService from "../services/instrumentService";
 
 export default class InstrumentController {
   static async getAll(
@@ -67,6 +67,35 @@ export default class InstrumentController {
       });
 
       res.status(200).json(newInstrument);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async lookupInstrument(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      // formatas "CI=10;DI=3;II=5"
+      const { stickerString } = req.body;
+
+      const result = await InstrumentService.lookupInstrument(stickerString);
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async saveUsedInstruments(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      res.status(200).json({ message: "Save used instruments: ok" });
     } catch (error) {
       next(error);
     }

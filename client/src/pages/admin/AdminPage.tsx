@@ -11,7 +11,6 @@ import {
 } from '../../store/features/adminSlice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
 import { MdMore } from 'react-icons/md';
-import { AdminMenu } from '../../components/admin/AdminMenu';
 
 export const AdminPage = () => {
   const dispatch = useAppDispatch();

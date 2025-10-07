@@ -1,11 +1,7 @@
 interface IConfig {
   port: number;
   nodeEnv: string;
-  printer: {
-    printer_host: string;
-    printer_port: string;
-    print_transport: 'raw' | 'ipp' | 'mock';
-  };
+
   ldap: {
     ldap_server: string;
     ldap_port: string;
@@ -27,15 +23,9 @@ function validateEnvVar(name: string): string {
 }
 
 const config: IConfig = {
-  port: Number(process.env.PORT) || 3004,
+  port: Number(process.env.PORT) || 3003,
   nodeEnv: process.env.NODE_ENV ?? 'development',
-  printer: {
-    printer_host: validateEnvVar('PRINTER_HOST'),
-    printer_port: validateEnvVar('PRINTER_PORT'),
-    print_transport: validateEnvVar(
-      'PRINT_TRANSPORT'
-    ) as IConfig['printer']['print_transport'],
-  },
+
   ldap: {
     ldap_server: validateEnvVar('LDAP_SERVER'),
     ldap_port: validateEnvVar('LDAP_PORT'),
