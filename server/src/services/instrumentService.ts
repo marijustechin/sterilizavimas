@@ -145,7 +145,11 @@ export default class InstrumentService {
     });
   }
 
-  // kol kas grazina string, bet veliau grazins instrumento duomenis
+  /**
+   *
+   * @param stickerString formatas: CI=5;DI=2;II=11 CI: recordId
+   * @returns object {}
+   */
   static async lookupInstrument(
     stickerString: string
   ): Promise<TScannedSticker> {
@@ -154,7 +158,7 @@ export default class InstrumentService {
 
     const item = await prisma.sterilizationCycleItem.findFirst({
       where: {
-        cycle_id: cycleId,
+        id: cycleId,
         department_id: departmentId,
         instrument_id: instrumentId,
       },

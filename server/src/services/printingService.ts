@@ -1,9 +1,12 @@
-import * as net from 'net';
-import config from '../config/config';
-import { TPrinterStatus, TSterilizationCyclePayload } from 'types';
-import { addDays, format } from 'date-fns';
-import { prisma } from '../config/prisma';
-import ApiError from '../errors/apiErrors';
+import * as net from "net";
+import {
+  TPrintedItem,
+  TPrinterStatus,
+  TSterilizationCyclePayload,
+} from "types";
+import { addDays, format } from "date-fns";
+import { prisma } from "../config/prisma";
+import ApiError from "../errors/apiErrors";
 
 export default class PrintingService {
   // patikriname ar spausdintuvas pasirengęs darbui
@@ -38,16 +41,16 @@ export default class PrintingService {
 
       client.setTimeout(2000);
 
-      client.once('connect', () => {
-        finish('ready', 'Spausdintuvas pasirengęs');
+      client.once("connect", () => {
+        finish("ready", "Spausdintuvas pasirengęs");
       });
 
-      client.once('timeout', () => {
-        finish('timeout', 'Spausdintuvas nepasiekiamas (timeout)');
+      client.once("timeout", () => {
+        finish("timeout", "Spausdintuvas nepasiekiamas (timeout)");
       });
 
-      client.once('error', () => {
-        finish('error', 'Nepavyko prisijungti prie spausdintuvo');
+      client.once("error", () => {
+        finish("error", "Nepavyko prisijungti prie spausdintuvo");
       });
 
       client.connect(printer.port, printer.ip_address);
@@ -56,40 +59,32 @@ export default class PrintingService {
 
   // spausdiname duomenis
   static async PrintLabels(
-    labelData: TSterilizationCyclePayload,
-    recordId: number
+    payload: TSterilizationCyclePayload,
+    items: TPrintedItem[]
   ): Promise<boolean> {
-    const zpl = this.buildZplFromPayload(labelData, recordId);
+    const zpl = this.buildZplFromPayload(payload, items);
     const printer = await prisma.printer.findUnique({
-      where: {
-        id: labelData.printerId,
-      },
+      where: { id: payload.printerId },
     });
-
     if (!printer)
-      throw ApiError.NotFound(
-        `Spausdintuvo ID:${labelData.printerId} duomenų bazėje nepavyko rasti`
-      );
+      throw ApiError.NotFound(`Spausdintuvas ID:${payload.printerId} nerastas`);
 
     return new Promise((resolve, reject) => {
       const client = net.createConnection(
-        {
-          host: printer.ip_address,
-          port: printer.port,
-        },
+        { host: printer.ip_address, port: printer.port },
         () => {
           client.write(zpl);
           client.end();
         }
       );
-      client.on('error', reject);
-      client.on('close', () => resolve(true));
+      client.on("error", reject);
+      client.on("close", () => resolve(true));
     });
   }
 
   private static buildZplFromPayload(
     payload: TSterilizationCyclePayload,
-    cycleId: number
+    items: TPrintedItem[]
   ): string {
     const DPI = 300;
     const DOTS_PER_MM = DPI / 25.4;
@@ -98,59 +93,56 @@ export default class PrintingService {
     const FONT = 36;
     const QR_SIZE = 5;
 
-    // aktyvi data ir galiojimas
     const today = new Date();
-    const formattedDateNow = format(today, 'yyyy-MM-dd');
-
-    const cycleAndSterilizer = payload.sterilizerId + '-' + payload.cycleNumber;
+    const formattedDateNow = format(today, "yyyy-MM-dd");
 
     const labels: string[] = [];
+    const deptById = new Map(
+      payload.departmentsAndInstruments.map((d) => [d.departmentId, d])
+    );
 
-    payload.departmentsAndInstruments.forEach((department) => {
-      department.instruments.forEach((instrument) => {
-        const dateEnd = addDays(today, instrument.instrument_exp);
-        const formatedDateEnd = format(dateEnd, 'yyyy-MM-dd');
-        const qrData = `CI=${cycleId};DI=${department.departmentId};II=${instrument.id}`;
-        const departmentAndInstrument =
-          department.department_code + '-' + instrument.instrument_code;
+    for (const it of items) {
+      const dept = deptById.get(it.department_id);
+      const instr = dept?.instruments.find((i) => i.id === it.instrument_id);
+      const dateEnd = addDays(today, instr?.instrument_exp ?? 0);
+      const formattedEnd = format(dateEnd, "yyyy-MM-dd");
 
-        const zpl =
-          '^XA\n' +
-          '^CI28\n' +
-          '^MTT\n' +
-          '^MNY\n' +
-          '^PR2\n' +
-          '^MD32\n' + // šiek tiek tamsiau; jei blyšku – iki 35
-          `^PW${W}\n` +
-          `^LL${L}\n` +
-          '^LH0,0\n' +
-          '^FWB\n' + // orientacija: bottom-up (–90°), kad „skaitytųsi“ iš apačios
-          // koordinates - x0 kairys lipduko kraštas, y0 lipduko viršus
-          // data x1 y8
-          `^FO${1 * DOTS_PER_MM},${
-            8 * DOTS_PER_MM
-          }^A0,N,${FONT},${FONT}^FD${formattedDateNow}^FS\n` +
-          // galiojimas x7 y8
-          `^FO${7 * DOTS_PER_MM},${
-            8 * DOTS_PER_MM
-          }^A0,N,${FONT},${FONT}^FD${formatedDateEnd}^FS\n` +
-          // sterilizatorius - partija x12 y15
-          `^FO${12 * DOTS_PER_MM},${
-            15 * DOTS_PER_MM
-          }^A0,N,${FONT},${FONT}^FD${cycleAndSterilizer}^FS\n` +
-          // skyrius - instrumentas x16 y15
-          `^FO${16 * DOTS_PER_MM},${
-            15 * DOTS_PER_MM
-          }^A0,N,${FONT},${FONT}^FD${departmentAndInstrument}^FS\n` +
-          // QR kodas x11 y3
-          `^FO${11 * DOTS_PER_MM},${3 * DOTS_PER_MM}^BQN,2,${QR_SIZE}\n` +
-          `^FDLA,${qrData}^FS\n` +
-          '^XZ';
+      const cycleAndSterilizer = `${payload.sterilizerId}-${payload.cycleNumber}`;
+      const departmentAndInstrument = `${dept?.department_code ?? ""}-${
+        instr?.instrument_code ?? ""
+      }`;
 
-        labels.push(zpl);
-      });
-    });
+      // svarbiausia vieta:
+      const qrData = `CI=${it.id};DI=${it.department_id};II=${it.instrument_id}`;
 
-    return labels.join('\n');
+      const zpl =
+        "^XA\n" +
+        "^CI28\n" +
+        "^MTT\n" +
+        "^MNY\n" +
+        "^PR2\n" +
+        "^MD32\n" +
+        `^PW${W}\n` +
+        `^LL${L}\n` +
+        "^LH0,0\n" +
+        "^FWB\n" +
+        `^FO${2 * DOTS_PER_MM},${
+          8 * DOTS_PER_MM
+        }^A0,N,${FONT},${FONT}^FD${formattedDateNow}^FS\n` +
+        `^FO${8 * DOTS_PER_MM},${
+          8 * DOTS_PER_MM
+        }^A0,N,${FONT},${FONT}^FD${formattedEnd}^FS\n` +
+        `^FO${12 * DOTS_PER_MM},${
+          15 * DOTS_PER_MM
+        }^A0,N,${FONT},${FONT}^FD${cycleAndSterilizer}^FS\n` +
+        `^FO${16 * DOTS_PER_MM},${
+          15 * DOTS_PER_MM
+        }^A0,N,${FONT},${FONT}^FD${departmentAndInstrument}^FS\n` +
+        `^FO${11 * DOTS_PER_MM},${3 * DOTS_PER_MM}^BQN,2,${QR_SIZE}\n` +
+        `^FDLA,${qrData}^FS\n` +
+        "^XZ";
+      labels.push(zpl);
+    }
+    return labels.join("\n");
   }
 }

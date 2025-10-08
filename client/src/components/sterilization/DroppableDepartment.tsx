@@ -1,14 +1,15 @@
-import { useDroppable } from '@dnd-kit/core';
-import type { ISelectedInstrument, TDepartment } from '../../types';
+import { useDroppable } from "@dnd-kit/core";
+import type { ISelectedInstrument, TDepartment } from "../../types";
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { useAppDispatch } from '../../store/store';
+} from "@dnd-kit/sortable";
+import { useAppDispatch } from "../../store/store";
 import {
   removeDepartmentFromSterilizer,
   removeInstrumentFromDepartment,
-} from '../../store/features/sterilizationSlice';
+  setInstrumentAmount,
+} from "../../store/features/sterilizationSlice";
 
 interface DroppableDepartmentProps {
   department: TDepartment;
@@ -17,7 +18,6 @@ interface DroppableDepartmentProps {
 
 export const DroppableDepartment = ({
   department,
-
   ins,
 }: DroppableDepartmentProps) => {
   const dispatch = useAppDispatch();
@@ -25,10 +25,10 @@ export const DroppableDepartment = ({
   const id = `department-dropzone-${department.id}`; // Unikalus ID droppable zonai
   const { setNodeRef, isOver } = useDroppable({ id: id });
 
-  const baseClasses = 'p-3 border rounded shadow flex flex-col gap-1 min-h-32';
+  const baseClasses = "p-3 border rounded shadow flex flex-col gap-1 min-h-32";
   const highlightClass = isOver
-    ? 'border-blue-500 bg-blue-100'
-    : 'border-gray-200 bg-white';
+    ? "border-blue-500 bg-blue-100"
+    : "border-gray-200 bg-amber-100";
 
   const handleRemoveDeparment = (department: TDepartment) => {
     dispatch(removeDepartmentFromSterilizer({ id: department.id }));
@@ -38,27 +38,32 @@ export const DroppableDepartment = ({
     dispatch(removeInstrumentFromDepartment({ instrument: instrument }));
   };
 
+  const handleAmountChange = (uniqueId: string, amount: number) => {
+    const newAmount = Math.max(1, amount);
+    dispatch(setInstrumentAmount({ uniqueId: uniqueId, amount: newAmount }));
+  };
+
   return (
     <div
       ref={setNodeRef}
       className={`${baseClasses} ${highlightClass} relative min-h-32`}
     >
-      <h3 className='font-semibold'>
+      <h3 className="font-semibold">
         <button
-          type='button'
-          className='text-rose-500 p-1 cursor-pointer'
+          type="button"
+          className="text-rose-500 p-1 cursor-pointer"
           onClick={() => handleRemoveDeparment(department)}
         >
           ❌
-        </button>{' '}
+        </button>{" "}
         {department.department_code}. {department.department_name}
       </h3>
       {isOver && (
-        <p className='text-sm text-blue-700 mt-2'>Numeskite instrumentą čia!</p>
+        <p className="text-sm text-blue-700 mt-2">Numeskite instrumentą čia!</p>
       )}
 
       {/* Čia atvaizduojami instrumentai, kurie priklauso šiam skyriui */}
-      <div className='mt-2 w-full flex flex-col gap-2'>
+      <div className="mt-2 w-full flex flex-col gap-2">
         {ins.length > 0 ? (
           <SortableContext
             // Naudojame unikalų ID iš uniqueId, kadangi instrumentas gali kartotis
@@ -67,22 +72,37 @@ export const DroppableDepartment = ({
           >
             {ins.map((item) => (
               <div
-                className='bg-sky-200 rounded p-2 border border-black'
+                className="bg-sky-200 rounded p-2 border border-black flex gap-1 justify-between items-center"
                 key={item.uniqueId}
               >
-                <button
-                  className='px-1 cursor-pointer'
-                  onClick={() => handleRemoveInstrument(item)}
-                >
-                  ❌
-                </button>{' '}
-                {item.instrument.instrument_code}.{' '}
-                {item.instrument.instrument_name}
+                {/* tekstas */}
+                <div>
+                  <button
+                    className="px-1 cursor-pointer"
+                    onClick={() => handleRemoveInstrument(item)}
+                  >
+                    ❌
+                  </button>{" "}
+                  {item.instrument.instrument_code}.{" "}
+                  {item.instrument.instrument_name}
+                </div>
+                <div>
+                  <input
+                    id={item.uniqueId}
+                    className="w-14 p-1 rounded-md bg-white"
+                    value={item.amount ?? 1}
+                    type="number"
+                    min={1}
+                    onChange={(e) =>
+                      handleAmountChange(item.uniqueId, Number(e.target.value))
+                    }
+                  />
+                </div>
               </div>
             ))}
           </SortableContext>
         ) : (
-          <p className='text-xs text-gray-500'>Nėra instrumentų</p>
+          <p className="text-xs text-gray-500">Nėra instrumentų</p>
         )}
       </div>
     </div>

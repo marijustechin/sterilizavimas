@@ -1,11 +1,12 @@
-import { TSterilizationCyclePayload } from 'types';
-import { prisma } from '../config/prisma';
+// SterilizationCycleRepository.ts
+import { TSterilizationCyclePayload } from "types";
+import { prisma } from "../config/prisma";
 
 export default class SterilizationCycleRepository {
   static async createSterilizationCycle(payload: TSterilizationCyclePayload) {
     try {
       const result = await prisma.$transaction(async (tx) => {
-        // 1. Įrašome naują sterilizacijos ciklą
+        // 1) ciklas
         const newCycle = await tx.sterilizationCycle.create({
           data: {
             user_id: payload.userId,
@@ -14,7 +15,7 @@ export default class SterilizationCycleRepository {
           },
         });
 
-        // 2. Ruošiame masyvą sterilizacijos ciklo elementams
+        // 2) paruošiam items
         const cycleItemsData = payload.departmentsAndInstruments.flatMap(
           (department) =>
             department.instruments.map((instrument) => ({
@@ -24,29 +25,42 @@ export default class SterilizationCycleRepository {
             }))
         );
 
-        // 3. Įrašome visus ciklo elementus
-        const createdItems = await tx.sterilizationCycleItem.createMany({
-          data: cycleItemsData,
+        // 3) įrašom items
+        await tx.sterilizationCycleItem.createMany({ data: cycleItemsData });
+
+        // 4) Pasiimam KĄ TIK įrašytus items su ID (nes createMany ID negrąžina)
+        const items = await tx.sterilizationCycleItem.findMany({
+          where: { cycle_id: newCycle.id },
+          select: { id: true, department_id: true, instrument_id: true },
+          orderBy: { id: "asc" },
         });
 
-        // 4. Grąžiname naujo ciklo ID, kad galėtumėte jį panaudoti QR kode
         return {
-          id: newCycle.id,
-          cycle_number: newCycle.cycle_number,
+          cycle: {
+            id: newCycle.id,
+            cycle_number: newCycle.cycle_number,
+            sterilizer_id: newCycle.sterilizer_id,
+          },
+          items, // svarbiausia: čia visi lipdukai su savo ID
         };
       });
 
-      // Jei viskas pavyko
       return {
         success: true,
-        data: result,
+        data: result as {
+          cycle: { id: number; cycle_number: number; sterilizer_id: number };
+          items: Array<{
+            id: number;
+            department_id: number;
+            instrument_id: number;
+          }>;
+        },
       };
     } catch (error) {
-      // Jei įvyko klaida, transakcija automatiškai atšaukiama
-      console.error('Klaida įrašant sterilizacijos ciklą:', error);
+      console.error("Klaida įrašant sterilizacijos ciklą:", error);
       return {
         success: false,
-        error: error,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

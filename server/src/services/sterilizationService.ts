@@ -1,10 +1,10 @@
-import { TSterilizationCyclePayload } from 'types';
-import { prisma } from '../config/prisma';
-import { startOfDay, endOfDay } from 'date-fns';
+import { TSterilizationCyclePayload } from "types";
+import { prisma } from "../config/prisma";
+import { startOfDay, endOfDay } from "date-fns";
 
-import ApiError from '../errors/apiErrors';
-import PrintingService from './printingService';
-import SterilizationCycleRepository from './SterilizationCycleRepository';
+import ApiError from "../errors/apiErrors";
+import PrintingService from "./printingService";
+import SterilizationCycleRepository from "./SterilizationCycleRepository";
 
 export default class SterilizationService {
   static async getCycleNumber(sterilizerId: number): Promise<number> {
@@ -21,7 +21,7 @@ export default class SterilizationService {
         },
       },
       orderBy: {
-        cycle_number: 'desc',
+        cycle_number: "desc",
       },
     });
 
@@ -31,39 +31,38 @@ export default class SterilizationService {
   static async saveSterilizationCycle(
     sterilizationCycleData: TSterilizationCyclePayload
   ) {
-    // 1. Patikriname partijos numerį
+    // 1) cycleNumber check – ok
     if (
       sterilizationCycleData.cycleNumber !==
       (await this.getCycleNumber(sterilizationCycleData.sterilizerId))
     ) {
-      throw ApiError.BadRequest('Neteisingas ciklo numeris');
+      throw ApiError.BadRequest("Neteisingas ciklo numeris");
     }
 
-    // 2. Patikriname spausdintuvo būseną
+    // 2) printer check – ok
     const printerStatus = await PrintingService.CheckPrinterStatus(
       sterilizationCycleData.printerId
     );
-
-    if (printerStatus.status !== 'ready')
+    if (printerStatus.status !== "ready") {
       throw ApiError.PrinterError(printerStatus.message);
+    }
 
-    // 3. Rasome duomenis į DB
+    // 3) įrašom į DB
     const saveResult =
       await SterilizationCycleRepository.createSterilizationCycle(
         sterilizationCycleData
       );
+    if (!saveResult.success || !saveResult.data) {
+      throw ApiError.BadRequest(saveResult.error || "Duomenų įrašymo klaida");
+    }
 
-    if (!saveResult.success)
-      throw ApiError.BadRequest('Duomenų įrašymo klaida');
-
-    // 4. Perduodame duomenis spausdinimui
-    const printResult = await PrintingService.PrintLabels(
+    // 4) spausdinam – perduodam VISUS items
+    const printOk = await PrintingService.PrintLabels(
       sterilizationCycleData,
-      10
+      saveResult.data.items // kiekvienas turės savo id/DI/II
     );
+    if (!printOk) throw ApiError.PrinterError("Spausdinimo klaida");
 
-    if (!printResult) throw ApiError.PrinterError('Spausdinimo klaida');
-
-    return { print: 'success', save: 'success' };
+    return { print: "success", save: "success" };
   }
 }

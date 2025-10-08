@@ -3,15 +3,15 @@ import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
-} from '@reduxjs/toolkit';
-import type { RootState } from '../store';
-import SterilizationService from '../../services/sterilizationService';
-import HelperService from '../../services/helperService';
+} from "@reduxjs/toolkit";
+import type { RootState } from "../store";
+import SterilizationService from "../../services/sterilizationService";
+import HelperService from "../../services/helperService";
 import type {
   ISelectedInstrument,
   TDepartment,
   TInstrument,
-} from '../../types';
+} from "../../types";
 
 // Atnaujintas SterilizationState interfeisas
 interface SterilizationState {
@@ -38,13 +38,13 @@ const initialState: SterilizationState = {
   // selected instruments in department
   instruments: [],
 
-  infoMessage: '',
+  infoMessage: "",
   printingPreview: false,
 };
 
 // Async Thunk ciklo numeriui gauti
 export const fetchNextCycleNumber = createAsyncThunk(
-  'sterilization/fetchNextCycleNumber',
+  "sterilization/fetchNextCycleNumber",
   async (sterilizerId: number, { rejectWithValue }) => {
     try {
       const response = await SterilizationService.getCycleNumber(sterilizerId);
@@ -57,7 +57,7 @@ export const fetchNextCycleNumber = createAsyncThunk(
 );
 
 const sterilizationSlice = createSlice({
-  name: 'sterilization',
+  name: "sterilization",
   initialState,
   reducers: {
     // reset sterilization state
@@ -106,16 +106,24 @@ const sterilizationSlice = createSlice({
         (item) => item.departmentId !== departmentId
       );
     },
+    // add instrument to department
     addInstrumentToDepartment: (
       state,
       action: PayloadAction<{
         instrument: TInstrument;
         departmentId: string;
         uniqueId: string;
+        amount?: number;
       }>
     ) => {
-      state.instruments = [...state.instruments, action.payload];
-      state.infoMessage = `Lipdukų skaičius: ${state.instruments.length}`;
+      const amount = Math.max(1, action.payload.amount ?? 1);
+      state.instruments = [...state.instruments, { ...action.payload, amount }];
+
+      const total = state.instruments.reduce(
+        (s, it) => s + (it.amount || 1),
+        0
+      );
+      state.infoMessage = `Lipdukų skaičius: ${total}`;
     },
     // remove instrument from department
     removeInstrumentFromDepartment: (
@@ -123,10 +131,42 @@ const sterilizationSlice = createSlice({
       action: PayloadAction<{ instrument: ISelectedInstrument }>
     ) => {
       const uniqueInstrmentId = action.payload.instrument.uniqueId;
+
       state.instruments = state.instruments.filter(
         (item) => item.uniqueId !== uniqueInstrmentId
       );
-      state.infoMessage = `Lipdukų skaičius: ${state.instruments.length}`;
+
+      const total = state.instruments.reduce(
+        (s, it) => s + (it.amount || 1),
+        0
+      );
+      state.infoMessage = `Lipdukų skaičius: ${total}`;
+    },
+    // cia reikes keisti instrumento kieki
+    setInstrumentAmount: (
+      state,
+      action: PayloadAction<{ uniqueId: string; amount: number }>
+    ) => {
+      const { uniqueId, amount } = action.payload;
+
+      // Randame instrumentą pagal uniqueId
+      const instrumentIndex = state.instruments.findIndex(
+        (item) => item.uniqueId === uniqueId
+      );
+
+      if (instrumentIndex !== -1) {
+        // Klonuojame objektą ir atnaujiname amount
+        state.instruments[instrumentIndex] = {
+          ...state.instruments[instrumentIndex],
+          amount: amount,
+        };
+      }
+
+      const total = state.instruments.reduce(
+        (s, it) => s + (it.amount || 1),
+        0
+      );
+      state.infoMessage = `Lipdukų skaičius: ${total}`;
     },
   },
 
@@ -161,6 +201,7 @@ export const {
   setMessage,
   setPrintingPreview,
   resetSterilizationState,
+  setInstrumentAmount,
 } = sterilizationSlice.actions;
 
 export const selectedDepartments = (state: RootState) =>
@@ -186,5 +227,8 @@ export const selectCycleNumberError = (state: RootState) =>
 
 export const selectPrintingPreview = (state: RootState) =>
   state.sterilization.printingPreview;
+
+export const selectTotalLabels = (state: RootState) =>
+  state.sterilization.instruments.reduce((s, it) => s + (it.amount || 1), 0);
 
 export default sterilizationSlice.reducer;

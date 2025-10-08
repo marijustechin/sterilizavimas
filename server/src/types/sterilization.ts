@@ -52,3 +52,9 @@ export type TSterilizationCyclePayload = {
   cycleNumber: number;
   departmentsAndInstruments: TInstrumentsOfDepartment[];
 };
+
+export type TPrintedItem = {
+  id: number; // CI
+  department_id: number; // DI
+  instrument_id: number; // II
+};

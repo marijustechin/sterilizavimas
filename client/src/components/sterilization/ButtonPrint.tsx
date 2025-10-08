@@ -1,25 +1,25 @@
-import { MdOutlinePrint } from 'react-icons/md';
-import { useAppDispatch, useAppSelector } from '../../store/store';
+import { MdOutlinePrint } from "react-icons/md";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import {
   fetchNextCycleNumber,
   resetSterilizationState,
   selectedInstruments,
   selectSelectedSterilizerId,
+  selectTotalLabels,
   setMessage,
   setPrintingPreview,
-} from '../../store/features/sterilizationSlice';
-import toast from 'react-hot-toast';
-import SterilizationService from '../../services/sterilizationService';
+} from "../../store/features/sterilizationSlice";
+import toast from "react-hot-toast";
+import SterilizationService from "../../services/sterilizationService";
 import type {
-  TInstrument,
   TInstrumentsOfDepartment,
   TSterilizationCyclePayload,
-} from '../../types';
-import { selectUser } from '../../store/features/authSlice';
-import { useLocation } from 'react-router';
-import HelperService from '../../services/helperService';
-import { selectDepartements } from '../../store/features/departmentSlice';
-import { useState } from 'react';
+} from "../../types";
+import { selectUser } from "../../store/features/authSlice";
+import { useLocation } from "react-router";
+import HelperService from "../../services/helperService";
+import { selectDepartements } from "../../store/features/departmentSlice";
+import { useState } from "react";
 
 export const ButtonPrint = () => {
   const dispatch = useAppDispatch();
@@ -27,7 +27,8 @@ export const ButtonPrint = () => {
   const instruments = useAppSelector(selectedInstruments);
   const departments = useAppSelector(selectDepartements);
   const user = useAppSelector(selectUser);
-  const printerId: number = Number(localStorage.getItem('selectedPrinter'));
+  const totalLabels = useAppSelector(selectTotalLabels);
+  const printerId: number = Number(localStorage.getItem("selectedPrinter"));
 
   const location = useLocation();
 
@@ -35,12 +36,12 @@ export const ButtonPrint = () => {
 
   const handlePrintAction = async () => {
     if (!sterilizerId) {
-      toast.error('Prašome pasirinkti sterilizatorių!');
+      toast.error("Prašome pasirinkti sterilizatorių!");
       return;
     }
 
     if (instruments.length < 1) {
-      toast.error('Prašome pasirinkti skyrius ir instrumentus!');
+      toast.error("Prašome pasirinkti skyrius ir instrumentus!");
       return;
     }
 
@@ -48,13 +49,13 @@ export const ButtonPrint = () => {
       // Šita klaida beveik neįmanoma - šitą sąlygą naudoju tik dėl to,
       // kad nemestų klaidos typescript inicijuojant
       // sterilizationCycleData.userId
-      toast.error('Neprisijungęs naudotojas');
+      toast.error("Neprisijungęs naudotojas");
       return;
     }
 
     if (!printerId) {
       toast.error(
-        'Nesukonfigūruotas spausdintuvas. Prašome pasirinkti spausdintuvą arba kreiptis į administratorių'
+        "Nesukonfigūruotas spausdintuvas. Prašome pasirinkti spausdintuvą arba kreiptis į administratorių"
       );
       return;
     }
@@ -62,35 +63,35 @@ export const ButtonPrint = () => {
     // visi sterilizavimo ciklo duomenys
     const dropzoneRegex = /^department-dropzone-(\d+)$/;
 
-    const departmentsAndInstruments: TInstrumentsOfDepartment[] =
-      instruments.reduce<
-        {
-          departmentId: number;
-          department_code: number;
-          instruments: TInstrument[];
-        }[]
-      >((acc, instrument) => {
-        const match = dropzoneRegex.exec(instrument.departmentId);
-        if (match) {
-          const departmentId = Number(match[1]);
-          // Surandame atitinkamą skyriaus objektą iš departments masyvo
-          const departmentInfo = departments.find((d) => d.id === departmentId);
+    const departmentsAndInstruments: TInstrumentsOfDepartment[] = (() => {
+      const byDept = new Map<number, TInstrumentsOfDepartment>();
 
-          if (departmentInfo) {
-            let department = acc.find((d) => d.departmentId === departmentId);
-            if (!department) {
-              department = {
-                departmentId,
-                department_code: departmentInfo.department_code, // Pridedame department_code
-                instruments: [],
-              };
-              acc.push(department);
-            }
-            department.instruments.push(instrument.instrument);
-          }
+      for (const instrumentEntry of instruments) {
+        const match = dropzoneRegex.exec(instrumentEntry.departmentId);
+        if (!match) continue;
+
+        const departmentId = Number(match[1]);
+        const departmentInfo = departments.find((d) => d.id === departmentId);
+        if (!departmentInfo) continue;
+
+        let group = byDept.get(departmentId);
+        if (!group) {
+          group = {
+            departmentId,
+            department_code: departmentInfo.department_code,
+            instruments: [],
+          };
+          byDept.set(departmentId, group);
         }
-        return acc;
-      }, []);
+
+        const count = Math.max(1, Math.floor(instrumentEntry.amount ?? 1));
+        for (let i = 0; i < count; i++) {
+          group.instruments.push(instrumentEntry.instrument);
+        }
+      }
+
+      return Array.from(byDept.values());
+    })();
 
     const sterilizationCycleData: TSterilizationCyclePayload = {
       printerId,
@@ -108,15 +109,15 @@ export const ButtonPrint = () => {
     // 2. Siunčiame duomenis į backend
     // spausdinimui ir įrašymui į DB
     dispatch(
-      setMessage({ message: 'Vyksta spausdinimas ir įrašymas duomenų bazę...' })
+      setMessage({ message: "Vyksta spausdinimas ir įrašymas duomenų bazę..." })
     );
 
     try {
       await SterilizationService.saveSterilizationCycle(sterilizationCycleData);
 
       // dar čia reikia nunulinti redux būseną
-      toast.success('Duomenys sėkmingai įrašyti');
-      dispatch(setMessage({ message: '' }));
+      toast.success("Duomenys sėkmingai įrašyti");
+      dispatch(setMessage({ message: "" }));
       dispatch(resetSterilizationState());
     } catch (error) {
       toast.error(HelperService.errorToString(error));
@@ -125,16 +126,16 @@ export const ButtonPrint = () => {
     setPrintDisabled(false);
   };
 
-  if (location.pathname === '/sterilizavimas') {
+  if (location.pathname === "/sterilizavimas") {
     return (
       <button
         disabled={printDisabled}
-        type='button'
-        className='flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500'
+        type="button"
+        className="flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500"
         onClick={handlePrintAction}
       >
         <MdOutlinePrint size={20} />
-        Spausdinti ({instruments.length})
+        Spausdinti ({totalLabels})
       </button>
     );
   } else {
