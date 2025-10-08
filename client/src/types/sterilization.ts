@@ -2,6 +2,7 @@ export interface ISelectedInstrument {
   instrument: TInstrument;
   uniqueId: string;
   departmentId: string;
+  amount: number;
 }
 
 export type TSterilizer = {
