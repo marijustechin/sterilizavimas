@@ -1,12 +1,12 @@
-import * as net from "net";
+import * as net from 'net';
 import {
   TPrintedItem,
   TPrinterStatus,
   TSterilizationCyclePayload,
-} from "types";
-import { addDays, format } from "date-fns";
-import { prisma } from "../config/prisma";
-import ApiError from "../errors/apiErrors";
+} from 'types';
+import { addDays, format } from 'date-fns';
+import { prisma } from '../config/prisma';
+import ApiError from '../errors/apiErrors';
 
 export default class PrintingService {
   // patikriname ar spausdintuvas pasirengęs darbui
@@ -41,16 +41,16 @@ export default class PrintingService {
 
       client.setTimeout(2000);
 
-      client.once("connect", () => {
-        finish("ready", "Spausdintuvas pasirengęs");
+      client.once('connect', () => {
+        finish('ready', 'Spausdintuvas pasirengęs');
       });
 
-      client.once("timeout", () => {
-        finish("timeout", "Spausdintuvas nepasiekiamas (timeout)");
+      client.once('timeout', () => {
+        finish('timeout', 'Spausdintuvas nepasiekiamas (timeout)');
       });
 
-      client.once("error", () => {
-        finish("error", "Nepavyko prisijungti prie spausdintuvo");
+      client.once('error', () => {
+        finish('error', 'Nepavyko prisijungti prie spausdintuvo');
       });
 
       client.connect(printer.port, printer.ip_address);
@@ -77,8 +77,8 @@ export default class PrintingService {
           client.end();
         }
       );
-      client.on("error", reject);
-      client.on("close", () => resolve(true));
+      client.on('error', reject);
+      client.on('close', () => resolve(true));
     });
   }
 
@@ -94,7 +94,7 @@ export default class PrintingService {
     const QR_SIZE = 5;
 
     const today = new Date();
-    const formattedDateNow = format(today, "yyyy-MM-dd");
+    const formattedDateNow = format(today, 'yyyy-MM-dd');
 
     const labels: string[] = [];
     const deptById = new Map(
@@ -105,27 +105,29 @@ export default class PrintingService {
       const dept = deptById.get(it.department_id);
       const instr = dept?.instruments.find((i) => i.id === it.instrument_id);
       const dateEnd = addDays(today, instr?.instrument_exp ?? 0);
-      const formattedEnd = format(dateEnd, "yyyy-MM-dd");
+      const formattedEnd = format(dateEnd, 'yyyy-MM-dd');
 
       const cycleAndSterilizer = `${payload.sterilizerId}-${payload.cycleNumber}`;
-      const departmentAndInstrument = `${dept?.department_code ?? ""}-${
-        instr?.instrument_code ?? ""
+      const departmentAndInstrument = `${dept?.department_code ?? ''}-${
+        instr?.instrument_code ?? ''
       }`;
+
+      const shortCode = it.short_code;
 
       // svarbiausia vieta:
       const qrData = `CI=${it.id};DI=${it.department_id};II=${it.instrument_id}`;
 
       const zpl =
-        "^XA\n" +
-        "^CI28\n" +
-        "^MTT\n" +
-        "^MNY\n" +
-        "^PR2\n" +
-        "^MD32\n" +
+        '^XA\n' +
+        '^CI28\n' +
+        '^MTT\n' +
+        '^MNY\n' +
+        '^PR2\n' +
+        '^MD32\n' +
         `^PW${W}\n` +
         `^LL${L}\n` +
-        "^LH0,0\n" +
-        "^FWB\n" +
+        '^LH0,0\n' +
+        '^FWB\n' +
         `^FO${2 * DOTS_PER_MM},${
           8 * DOTS_PER_MM
         }^A0,N,${FONT},${FONT}^FD${formattedDateNow}^FS\n` +
@@ -138,11 +140,14 @@ export default class PrintingService {
         `^FO${16 * DOTS_PER_MM},${
           15 * DOTS_PER_MM
         }^A0,N,${FONT},${FONT}^FD${departmentAndInstrument}^FS\n` +
+        `^FO${17 * DOTS_PER_MM},${15 * DOTS_PER_MM}^A0,N,${FONT - 6},${
+          FONT - 6
+        }^FD${shortCode}^FS\n` +
         `^FO${11 * DOTS_PER_MM},${3 * DOTS_PER_MM}^BQN,2,${QR_SIZE}\n` +
         `^FDLA,${qrData}^FS\n` +
-        "^XZ";
+        '^XZ';
       labels.push(zpl);
     }
-    return labels.join("\n");
+    return labels.join('\n');
   }
 }

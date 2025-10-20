@@ -3,3 +3,4 @@ export * from './printer';
 export * from './user';
 export * from './admin';
 export * from './medic';
+export * from './sticker';

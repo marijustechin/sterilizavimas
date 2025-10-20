@@ -53,3 +53,12 @@ export type TSterilizationCyclePayload = {
   cycleNumber: number;
   departmentsAndInstruments: TInstrumentsOfDepartment[];
 };
+
+export type TSterilizationCycleItem = {
+  id: number;
+  short_code: string | null;
+  cycle_id: number;
+  instrument_id: number;
+  department_id: number;
+  success: boolean;
+};

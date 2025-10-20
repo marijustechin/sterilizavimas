@@ -12,6 +12,7 @@ import { AdminInstruments } from './pages/sterilization/AdminInstruments';
 import { AdminDepartments } from './pages/sterilization/AdminDepartments';
 import { AdminSterilizers } from './pages/sterilization/AdminSterilizers';
 import { PrintersPage } from './pages/admin/PrintersPage';
+import { AdminStickers } from './pages/sterilization/AdminStickers';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -39,7 +40,7 @@ function App() {
           <Route index element={<AdminPage />} />
           <Route path='/admin/spausdintuvai' element={<PrintersPage />} />
         </Route>
-      
+
         <Route path='/sterilizavimas' element={<SterilizationLayout />}>
           <Route index element={<SterilizationPage />} />
           <Route
@@ -54,6 +55,7 @@ function App() {
             path='/sterilizavimas/skyriai'
             element={<AdminDepartments />}
           />
+          <Route path='/sterilizavimas/lipdukai' element={<AdminStickers />} />
         </Route>
       </Routes>
     </BrowserRouter>

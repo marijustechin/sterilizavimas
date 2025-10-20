@@ -2,36 +2,40 @@
 @import 'tailwindcss';
 
 body {
-    font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Forms */
-
-.form-label{
-    @apply text-rose-800/50
+.form-label {
+  @apply text-rose-800/50;
 }
 
-.form-input{
-    @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40
+.form-input {
+  @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40;
 }
 
-.form-textarea{
-    @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40
+.form-textarea {
+  @apply border border-rose-800/20 rounded-lg p-2 autofill:transition-colors autofill:duration-[999999999s] focus:outline-rose-800/40;
 }
 
-.btn-generic{
-    @apply cursor-pointer p-2 bg-rose-800 text-white hover:bg-rose-900 hover:text-rose-200 rounded-lg
+/* Buttons */
+.btn-generic {
+  @apply cursor-pointer p-2 bg-rose-800 text-white hover:bg-rose-900 hover:text-rose-200 rounded-lg;
 }
 
-.btn-rose{
-    @apply cursor-pointer p-2 rounded-lg bg-rose-300 hover:bg-rose-500
+.btn-rose {
+  @apply cursor-pointer p-2 rounded-lg bg-rose-300 hover:bg-rose-500;
 }
 
-.btn-emerald{
-    @apply cursor-pointer p-2 rounded-lg bg-emerald-300 hover:bg-emerald-500
+.btn-emerald {
+  @apply cursor-pointer p-2 rounded-lg bg-emerald-300 hover:bg-emerald-500;
 }
 
-.btn-amber{
-    @apply cursor-pointer p-2 rounded-lg bg-amber-300 hover:bg-amber-500
+.btn-amber {
+  @apply cursor-pointer p-2 rounded-lg bg-amber-300 hover:bg-amber-500;
 }
 
+/* Inpusts */
+.input-filter {
+  @apply w-16 px-2 py-1 border border-gray-400 rounded-lg;
+}

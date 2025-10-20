@@ -20,6 +20,7 @@ export const TopMenu = () => {
     { name: 'Instrumentai', link: '/sterilizavimas/instrumentai' },
     { name: 'Skyriai', link: '/sterilizavimas/skyriai' },
     { name: 'Sterilizatoriai', link: '/sterilizavimas/sterilizatoriai' },
+    { name: 'Lipdukai', link: '/sterilizavimas/lipdukai' },
   ];
 
   return (
