@@ -1,6 +1,7 @@
 // SterilizationCycleRepository.ts
-import { TSterilizationCyclePayload } from "types";
-import { prisma } from "../config/prisma";
+import { TSterilizationCyclePayload } from 'types';
+import { prisma } from '../config/prisma';
+import HelperService from './helperService';
 
 export default class SterilizationCycleRepository {
   static async createSterilizationCycle(payload: TSterilizationCyclePayload) {
@@ -15,7 +16,7 @@ export default class SterilizationCycleRepository {
           },
         });
 
-        // 2) paruošiam items
+        // 2) paruošiam items be short_code
         const cycleItemsData = payload.departmentsAndInstruments.flatMap(
           (department) =>
             department.instruments.map((instrument) => ({
@@ -28,11 +29,33 @@ export default class SterilizationCycleRepository {
         // 3) įrašom items
         await tx.sterilizationCycleItem.createMany({ data: cycleItemsData });
 
-        // 4) Pasiimam KĄ TIK įrašytus items su ID (nes createMany ID negrąžina)
-        const items = await tx.sterilizationCycleItem.findMany({
+        // 4) Pasiimam ką tik įrašytus items su ID (vienoje transakcijoje — kiti jų nematys tol, kol nekomituosim)
+        const itemsToUpdate = await tx.sterilizationCycleItem.findMany({
           where: { cycle_id: newCycle.id },
           select: { id: true, department_id: true, instrument_id: true },
-          orderBy: { id: "asc" },
+          orderBy: { id: 'asc' },
+        });
+
+        // 5) Atnaujinam short_code pagal item.id
+        // Generuojame short_code ir atnaujiname. Promise.all vykdomas per tx, tad viskas lieka atomic.
+        const updatePromises = itemsToUpdate.map((item) => {
+          const itemShortCode = HelperService.encodeBase36(item.id);
+          return tx.sterilizationCycleItem.update({
+            where: { id: item.id },
+            data: { short_code: itemShortCode },
+          });
+        });
+        await Promise.all(updatePromises);
+        // 6) Grąžinam galutinius įrašus (su short_code)
+        const finalItems = await tx.sterilizationCycleItem.findMany({
+          where: { cycle_id: newCycle.id },
+          select: {
+            id: true,
+            department_id: true,
+            instrument_id: true,
+            short_code: true,
+          },
+          orderBy: { id: 'asc' },
         });
 
         return {
@@ -41,7 +64,7 @@ export default class SterilizationCycleRepository {
             cycle_number: newCycle.cycle_number,
             sterilizer_id: newCycle.sterilizer_id,
           },
-          items, // svarbiausia: čia visi lipdukai su savo ID
+          items: finalItems, // svarbiausia: čia visi lipdukai su savo ID
         };
       });
 
@@ -53,11 +76,12 @@ export default class SterilizationCycleRepository {
             id: number;
             department_id: number;
             instrument_id: number;
+            short_code: string;
           }>;
         },
       };
     } catch (error) {
-      console.error("Klaida įrašant sterilizacijos ciklą:", error);
+      console.error('Klaida įrašant sterilizacijos ciklą:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),

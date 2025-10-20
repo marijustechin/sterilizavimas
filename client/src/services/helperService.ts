@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { format, parseISO } from 'date-fns';
 import type { TUser } from '../types/user';
 
 export default class HelperService {
@@ -42,5 +43,18 @@ export default class HelperService {
       // Grąžiname null, kad informuotume, jog accessToken negalioja.
       return null;
     }
+  }
+
+  static dateStringToDate(
+    dateString: string,
+    date?: boolean,
+    time?: boolean
+  ): string {
+    // 1. Pirmiausia paverčiam ISO formatą į JavaScript Date objektą
+    const dateObject = parseISO(dateString);
+    if (date) return format(dateObject, 'yyyy-MM-dd');
+    if (time) return format(dateObject, 'HH:mm:ss');
+
+    return format(dateObject, 'yyyy-MM-dd HH:mm:ss');
   }
 }
