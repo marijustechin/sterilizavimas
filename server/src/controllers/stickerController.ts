@@ -17,6 +17,8 @@ export default class StickerController {
       };
 
       const filters = {
+        limit: first(q.limit),
+        currentPage: first(q.currentPage),
         cycleNumber: first(q.cycleNumber),
         departmentCode: first(q.departmentCode),
         instrumentCode: first(q.instrumentCode),

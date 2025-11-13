@@ -19,3 +19,10 @@ export type TSticker = {
   department: TDepartment;
   cycle: TCycle;
 };
+
+export type TGetStickersResponse = {
+  items: TSticker[];
+  total: number;
+  page: number;
+  totalPages: number;
+};

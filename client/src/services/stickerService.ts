@@ -1,8 +1,8 @@
 import $axios from '../config/axios';
-import type { TSterilizationCycleItem, TSticker } from '../types';
+import type { TGetStickersResponse, TSterilizationCycleItem } from '../types';
 
 export default class StickerService {
-  static async getAll(query: string): Promise<TSticker[]> {
+  static async getAll(query: string): Promise<TGetStickersResponse> {
     const response = await $axios.get(`/sticker${query}`);
 
     return response.data;

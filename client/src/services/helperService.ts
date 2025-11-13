@@ -57,4 +57,32 @@ export default class HelperService {
 
     return format(dateObject, 'yyyy-MM-dd HH:mm:ss');
   }
+
+  /**
+   * Konvertuoja <input> įvesties eilutę į teigiamą skaičių arba undefined.
+   * @param value Įvesties eilutė iš input lauko (e.g., e.target.value).
+   * @returns Teigiamas skaičius (> 0) arba undefined.
+   */
+  static readonly getPositiveNumberOrUndefined = (
+    value: string
+  ): number | undefined => {
+    const trimmedValue = value.trim();
+
+    // 1. Jei eilutė tuščia, grąžiname undefined
+    if (trimmedValue === '') {
+      return undefined;
+    }
+
+    // 2. Bandome paversti į skaičių
+    const num = Number(trimmedValue);
+
+    // 3. Patikriname, ar tai tikras skaičius (ne NaN) ir ar jis > 0
+    // NaN > 0 grąžins false, todėl num > 0 veikia kaip validacija
+    if (num > 0) {
+      return num;
+    }
+
+    // 4. Jei įvestis buvo neteisinga (pvz., tekstas) arba skaičius <= 0, grąžiname undefined
+    return undefined;
+  };
 }
