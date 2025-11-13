@@ -3,7 +3,11 @@ import {
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit';
-import type { TSterilizationCycleItem, TSticker } from '../../types';
+import type {
+  TGetStickersResponse,
+  TSterilizationCycleItem,
+  TSticker,
+} from '../../types';
 import type { RootState } from '../store';
 import StickerService from '../../services/stickerService';
 import HelperService from '../../services/helperService';
@@ -15,6 +19,10 @@ interface IStickerState {
   stickers: TSticker[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
+  totalPages: number;
+  totalSticerRecords: number;
+  currentPage: number;
+  limit: number | undefined;
 }
 
 const initialState: IStickerState = {
@@ -24,11 +32,15 @@ const initialState: IStickerState = {
   stickers: [],
   status: 'idle',
   error: null,
+  totalPages: 0,
+  currentPage: 1,
+  limit: 15,
+  totalSticerRecords: 0,
 };
 
 // Get all stickers
 export const getStickers = createAsyncThunk<
-  TSticker[],
+  TGetStickersResponse,
   void,
   { state: RootState }
 >('sticker/getStickers', async (_, { getState, rejectWithValue }) => {
@@ -37,9 +49,15 @@ export const getStickers = createAsyncThunk<
     const cycleNumber = state.sticker.cycleNumber;
     const departmentid = state.sticker.departmentid;
     const instrumentid = state.sticker.instrumentid;
+    const currentPage = state.sticker.currentPage;
+    const limit = state.sticker.limit;
 
     const query =
-      '?cycleNumber=' +
+      '?currentPage=' +
+      currentPage +
+      '&limit=' +
+      limit +
+      '&cycleNumber=' +
       cycleNumber +
       '&departmentCode=' +
       departmentid +
@@ -72,6 +90,7 @@ export const stickerSlice = createSlice({
   name: 'sticker',
   initialState,
   reducers: {
+    // filters
     setFilterCycleNumber: (
       state,
       action: PayloadAction<{ cycleNumber: number | undefined }>
@@ -90,10 +109,23 @@ export const stickerSlice = createSlice({
     ) => {
       state.instrumentid = action.payload.instrumentid;
     },
+    setFilterLimit: (
+      state,
+      action: PayloadAction<{ limit: number | undefined }>
+    ) => {
+      state.limit = action.payload.limit;
+    },
     resetStickerFilters: (state) => {
       state.cycleNumber = undefined;
       state.departmentid = undefined;
       state.instrumentid = undefined;
+    },
+    // pagination
+    setSticerListCurrentPage: (
+      state,
+      action: PayloadAction<{ current: number }>
+    ) => {
+      state.currentPage = action.payload.current;
     },
   },
   extraReducers: (builder) => {
@@ -106,7 +138,9 @@ export const stickerSlice = createSlice({
       .addCase(getStickers.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
-        state.stickers = action.payload;
+        state.stickers = action.payload.items;
+        state.totalPages = action.payload.totalPages;
+        state.totalSticerRecords = action.payload.total;
       })
       .addCase(getStickers.rejected, (state, action) => {
         state.status = 'failed';
@@ -141,6 +175,8 @@ export const {
   setFilterDepartmentId,
   setFilterInstrumentId,
   resetStickerFilters,
+  setSticerListCurrentPage,
+  setFilterLimit,
 } = stickerSlice.actions;
 
 export const selectStickers = (state: RootState) => state.sticker;

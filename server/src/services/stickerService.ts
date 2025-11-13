@@ -1,10 +1,12 @@
 // services/stickerService.ts
-import { TSterilizationCycleItem, TSticker } from 'types';
+import { TGetStickersResponse, TSterilizationCycleItem, TSticker } from 'types';
 import { prisma } from '../config/prisma';
 import { Prisma } from '@prisma/client';
 import ApiError from '../errors/apiErrors';
 
 interface StickerFilter {
+  limit?: string;
+  currentPage?: string;
   cycleNumber?: string;
   departmentCode?: string;
   instrumentCode?: string;
@@ -27,7 +29,11 @@ export default class StickerService {
    * @param filters
    * @returns
    */
-  static async getAll(filters: StickerFilter): Promise<TSticker[]> {
+  static async getAll(filters: StickerFilter): Promise<TGetStickersResponse> {
+    const limit = this.toIntSafe(filters.limit) ?? 15;
+    const currentPage = this.toIntSafe(filters.currentPage) ?? 1;
+    // Apskaičiuojame, kiek įrašų praleisti
+    const skip = (currentPage - 1) * limit;
     // pradinis where objektas
     const where: Prisma.SterilizationCycleItemWhereInput = {};
 
@@ -67,6 +73,8 @@ export default class StickerService {
     }
 
     const stickers = await prisma.sterilizationCycleItem.findMany({
+      take: limit,
+      skip,
       where,
       include: {
         instrument: true,
@@ -75,7 +83,19 @@ export default class StickerService {
       },
     });
 
-    return stickers as unknown as TSticker[];
+    const totalStickers = await prisma.sterilizationCycleItem.count({ where });
+
+    const totalPages =
+      totalStickers % limit === 0
+        ? Math.floor(totalStickers / limit)
+        : Math.floor(totalStickers / limit) + 1;
+
+    return {
+      items: stickers as unknown as TSticker[],
+      total: totalStickers,
+      totalPages: totalPages,
+      page: currentPage,
+    };
   }
 
   /**

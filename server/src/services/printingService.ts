@@ -137,10 +137,10 @@ export default class PrintingService {
         `^FO${12 * DOTS_PER_MM},${
           15 * DOTS_PER_MM
         }^A0,N,${FONT},${FONT}^FD${cycleAndSterilizer}^FS\n` +
-        `^FO${16 * DOTS_PER_MM},${
+        `^FO${15 * DOTS_PER_MM},${
           15 * DOTS_PER_MM
         }^A0,N,${FONT},${FONT}^FD${departmentAndInstrument}^FS\n` +
-        `^FO${17 * DOTS_PER_MM},${15 * DOTS_PER_MM}^A0,N,${FONT - 6},${
+        `^FO${18 * DOTS_PER_MM},${15 * DOTS_PER_MM}^A0,N,${FONT - 6},${
           FONT - 6
         }^FD${shortCode}^FS\n` +
         `^FO${11 * DOTS_PER_MM},${3 * DOTS_PER_MM}^BQN,2,${QR_SIZE}\n` +
