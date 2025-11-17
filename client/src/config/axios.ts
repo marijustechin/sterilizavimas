@@ -1,9 +1,9 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 // build eilute
-//export const BASE_URL = '/api/v1';
+export const BASE_URL = '/api/v1';
 
 // dev eilute
-export const BASE_URL = 'http://localhost:3003/api/v1';
+//export const BASE_URL = 'http://localhost:3003/api/v1';
 
 const $axios = axios.create({
   withCredentials: true,

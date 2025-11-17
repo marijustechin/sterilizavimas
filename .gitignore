@@ -26,5 +26,8 @@ dist-ssr
 *.sln
 *.sw?
 
+# Deployment
+deploy.js
+
 *.tsbuildinfo
 tsconfig.tsbuildinfo
