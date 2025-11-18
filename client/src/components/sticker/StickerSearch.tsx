@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../store/store';
+import {
+  selectStickersSearchString,
+  setFilterSearchString,
+} from '../../store/features/stickerSlice';
 
 interface ISearchProps {
   placeholderText: string;
@@ -7,8 +11,13 @@ interface ISearchProps {
   width: number;
 }
 
-export const Search = ({ placeholderText, onSearch, width }: ISearchProps) => {
-  const [searchText, setSearchText] = useState('');
+export const StickerSearch = ({
+  placeholderText,
+  onSearch,
+  width,
+}: ISearchProps) => {
+  const dispatch = useAppDispatch();
+  const searchText = useAppSelector(selectStickersSearchString);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -18,7 +27,7 @@ export const Search = ({ placeholderText, onSearch, width }: ISearchProps) => {
   };
 
   const handleClearSearch = () => {
-    setSearchText('');
+    dispatch(setFilterSearchString({ text: '' }));
     onSearch('');
   };
 
@@ -29,7 +38,9 @@ export const Search = ({ placeholderText, onSearch, width }: ISearchProps) => {
       <input
         className='px-2 py-1 flex-grow bg-transparent focus:outline-none'
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={(e) =>
+          dispatch(setFilterSearchString({ text: e.target.value }))
+        }
         onKeyUp={handleSearch}
         id={placeholderText}
         type='text'

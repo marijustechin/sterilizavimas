@@ -22,6 +22,8 @@ export default class StickerController {
         cycleNumber: first(q.cycleNumber),
         departmentCode: first(q.departmentCode),
         instrumentCode: first(q.instrumentCode),
+        onlyDefected: first(q.onlyDefecet),
+        searchString: first(q.search),
       };
 
       const stickers = await StickerService.getAll(filters);

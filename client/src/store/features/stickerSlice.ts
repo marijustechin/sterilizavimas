@@ -23,6 +23,8 @@ interface IStickerState {
   totalSticerRecords: number;
   currentPage: number;
   limit: number | undefined;
+  onlyDefected: boolean;
+  searchString: string;
 }
 
 const initialState: IStickerState = {
@@ -36,6 +38,8 @@ const initialState: IStickerState = {
   currentPage: 1,
   limit: 15,
   totalSticerRecords: 0,
+  onlyDefected: false,
+  searchString: '',
 };
 
 // Get all stickers
@@ -51,6 +55,8 @@ export const getStickers = createAsyncThunk<
     const instrumentid = state.sticker.instrumentid;
     const currentPage = state.sticker.currentPage;
     const limit = state.sticker.limit;
+    const onlyDefecet = state.sticker.onlyDefected;
+    const searchString = state.sticker.searchString;
 
     const query =
       '?currentPage=' +
@@ -62,7 +68,11 @@ export const getStickers = createAsyncThunk<
       '&departmentCode=' +
       departmentid +
       '&instrumentCode=' +
-      instrumentid;
+      instrumentid +
+      '&onlyDefecet=' +
+      onlyDefecet +
+      '&search=' +
+      searchString;
 
     const response = await StickerService.getAll(query);
     return response;
@@ -115,10 +125,21 @@ export const stickerSlice = createSlice({
     ) => {
       state.limit = action.payload.limit;
     },
+    setFilterOnlyDefected: (
+      state,
+      action: PayloadAction<{ onlyDefected: boolean }>
+    ) => {
+      state.onlyDefected = action.payload.onlyDefected;
+    },
+    setFilterSearchString: (state, action: PayloadAction<{ text: string }>) => {
+      state.searchString = action.payload.text;
+    },
     resetStickerFilters: (state) => {
       state.cycleNumber = undefined;
       state.departmentid = undefined;
       state.instrumentid = undefined;
+      state.searchString = '';
+      state.onlyDefected = false;
     },
     // pagination
     setSticerListCurrentPage: (
@@ -171,6 +192,8 @@ export const stickerSlice = createSlice({
 });
 
 export const {
+  setFilterOnlyDefected,
+  setFilterSearchString,
   setFilterCycleNumber,
   setFilterDepartmentId,
   setFilterInstrumentId,
@@ -180,5 +203,9 @@ export const {
 } = stickerSlice.actions;
 
 export const selectStickers = (state: RootState) => state.sticker;
+export const selectStickersOnlyDefected = (state: RootState) =>
+  state.sticker.onlyDefected;
+export const selectStickersSearchString = (state: RootState) =>
+  state.sticker.searchString;
 
 export default stickerSlice.reducer;

@@ -31,3 +31,5 @@ deploy.js
 
 *.tsbuildinfo
 tsconfig.tsbuildinfo
+
+/src/generated/prisma

@@ -10,6 +10,8 @@ interface StickerFilter {
   cycleNumber?: string;
   departmentCode?: string;
   instrumentCode?: string;
+  searchString?: string;
+  onlyDefected?: string;
 }
 
 export default class StickerService {
@@ -61,7 +63,7 @@ export default class StickerService {
       };
     }
 
-    // 3. FILTRAVIMAS PAGAL CIKLO NUMERĮ (CYCLENUMBER) - Lieka beveik nepakitęs
+    // 3. FILTRAVIMAS PAGAL CIKLO NUMERĮ (CYCLENUMBER)
     const cycleNumber = this.toIntSafe(filters.cycleNumber);
     if (cycleNumber !== undefined) {
       // Ryšio filtravimas: cycle yra to-one, naudojame `is`
@@ -70,6 +72,20 @@ export default class StickerService {
           cycle_number: cycleNumber,
         },
       };
+    }
+
+    // 4. FILTRAVIMAS PAGAL UNIKALŲ ID (short_code)
+    const searchString = filters.searchString;
+    if (searchString) {
+      where.short_code = {
+        contains: searchString, // = %searchString%
+      };
+    }
+
+    // 5. FILTRAVIMAS PAGAL GERAS/BLOGAS (success)
+    if (filters.onlyDefected !== undefined) {
+      const onlyDefected = filters.onlyDefected === 'true' ? false : true;
+      where.success = onlyDefected;
     }
 
     const stickers = await prisma.sterilizationCycleItem.findMany({

@@ -7,8 +7,10 @@ import {
   setFilterDepartmentId,
   setFilterInstrumentId,
   setFilterLimit,
+  setFilterSearchString,
 } from '../../store/features/stickerSlice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
+import { StickerSearch } from '../sticker/StickerSearch';
 
 export const StickerListFilter = () => {
   const dispatch = useAppDispatch();
@@ -40,6 +42,11 @@ export const StickerListFilter = () => {
     dispatch(getStickers());
   };
 
+  const handleOnSearch = (text: string) => {
+    dispatch(setFilterSearchString({ text: text }));
+    dispatch(getStickers());
+  };
+
   const resetFilters = () => {
     dispatch(resetStickerFilters());
     dispatch(getStickers());
@@ -47,10 +54,14 @@ export const StickerListFilter = () => {
 
   return (
     <div className='flex gap-3 items-center border-b border-gray-200 py-1'>
-      <div className='font-semibold'>Rodyti puslapyje: </div>
+      <div>
+        Viso:{' '}
+        <span className='font-semibold'>{stickers.totalSticerRecords}</span>
+      </div>
+      <div>Puslapyje: </div>
       <select
         id='showinpage'
-        className='px-2 py-1 border border-rose-800/50 rounded-lg focus:outline-none'
+        className='px-2 py-1 border border-rose-800/50 rounded-lg focus:outline-none font-semibold'
         defaultValue={15}
         onChange={(e) => handleShowInPageChange(e.target.value)}
       >
@@ -59,9 +70,13 @@ export const StickerListFilter = () => {
         <option value={50}>50</option>
         <option value={100}>100</option>
       </select>
-      <div className='font-semibold'>Filtruoti pagal: </div>
+      <StickerSearch
+        width={32}
+        placeholderText='Ieškoti pagal ID'
+        onSearch={(text) => handleOnSearch(text)}
+      />
       <div>
-        partijos nr:{' '}
+        Partijos nr:{' '}
         <input
           className='input-filter'
           type='number'
@@ -71,7 +86,7 @@ export const StickerListFilter = () => {
         />
       </div>
       <div>
-        skyrius:{' '}
+        Skyrius:{' '}
         <input
           className='input-filter'
           type='number'
@@ -81,7 +96,7 @@ export const StickerListFilter = () => {
         />
       </div>
       <div>
-        instrumentas:{' '}
+        Instrumentas:{' '}
         <input
           className='input-filter'
           type='number'
@@ -92,6 +107,8 @@ export const StickerListFilter = () => {
       </div>
       {(stickers.cycleNumber ||
         stickers.departmentid ||
+        stickers.searchString ||
+        stickers.onlyDefected === true ||
         stickers.instrumentid) && (
         <button type='button' className='btn-rose' onClick={resetFilters}>
           ❌ Nefiltruoti

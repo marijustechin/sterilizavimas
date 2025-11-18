@@ -1,5 +1,6 @@
 import { selectCurrentCycleNumber } from '../../store/features/sterilizationSlice';
 import { useAppSelector } from '../../store/store';
+import { StickerFilterDefect } from '../sticker/StickerFilterDefect';
 import { ButtonPrint } from './ButtonPrint';
 import { Link, useLocation } from 'react-router';
 
@@ -35,6 +36,9 @@ export const TopMenu = () => {
           <h3>
             Partijos Nr. <span className='font-semibold'>{cycleNumber}</span>
           </h3>
+        )}
+        {location.pathname === '/sterilizavimas/lipdukai' && (
+          <StickerFilterDefect />
         )}
       </div>
 
