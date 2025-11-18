@@ -36,6 +36,7 @@ export const AdminPage = () => {
     <main className='flex flex-col gap-4'>
       <section>
         <Search
+          width={40}
           placeholderText='Paieška pagal kažką'
           onSearch={(text) => onSearch(text)}
         />
