@@ -9,6 +9,14 @@ interface IConfig {
     ldap_user: string;
     ldap_password: string;
   };
+
+  intranet: {
+    db_name: string;
+    db_pass: string;
+    db_host: string;
+    db_user: string;
+    db_chrset: string;
+  };
 }
 
 function validateEnvVar(name: string): string {
@@ -32,6 +40,14 @@ const config: IConfig = {
     ldap_domain: validateEnvVar('LDAP_DOMAIN'),
     ldap_user: validateEnvVar('LDAP_USER'),
     ldap_password: validateEnvVar('LDAP_PASSWORD'),
+  },
+
+  intranet: {
+    db_chrset: validateEnvVar('DB_CHRSET_INTRANET'),
+    db_host: validateEnvVar('DB_HOST_INTRANET'),
+    db_name: validateEnvVar('DB_NAME_INTRANET'),
+    db_pass: validateEnvVar('DB_PASS_INTRANET'),
+    db_user: validateEnvVar('DB_USER_INTRANET'),
   },
 };
 

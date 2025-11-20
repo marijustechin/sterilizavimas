@@ -1,48 +1,11 @@
-import { TInstrument, TNewInstrument, TScannedSticker } from "types";
-import { prisma } from "../config/prisma";
-import ApiError from "../errors/apiErrors";
-import { addDays, format } from "date-fns";
+import { TInstrument, TNewInstrument, TScannedSticker } from 'types';
+import { prisma } from '../config/prisma';
+import ApiError from '../errors/apiErrors';
+import { addDays, format } from 'date-fns';
+import HelperService from './helperService';
+import RawDbService from './rawDbService';
 
 export default class InstrumentService {
-  /**
-   * @param s sticker string, pvz: "CI=1;DI=2;II=3"
-   * @returns { cycleId, departmentId, instrumentId }
-   * @throws ApiError.BadRequest jei string netinkamo formato
-   */
-  static parseStickerString(s: string) {
-    if (typeof s !== "string" || !s.trim()) {
-      throw ApiError.BadRequest(
-        "stickerString privalomas ir turi būti tekstas"
-      );
-    }
-
-    const map: Record<string, string> = {};
-    for (const chunk of s.split(";")) {
-      const [k, v] = chunk.split("=");
-      if (!k || !v) continue;
-      map[k.trim().toUpperCase()] = v.trim();
-    }
-
-    const toPosInt = (val?: string) => {
-      const n = val ? Number.parseInt(val, 10) : NaN;
-      return Number.isInteger(n) && n > 0 ? n : null;
-    };
-
-    const cycleId = toPosInt(map.CI);
-    const departmentId = toPosInt(map.DI);
-    const instrumentId = toPosInt(map.II);
-
-    if (!cycleId || !departmentId || !instrumentId) {
-      // Jei lipdukas būtų „CI“ = cycle_number, o ne PK, tada vietoj cycle_id naudotum:
-      // where: { department_id: DI, instrument_id: II, cycle: { cycle_number: CI } }
-      throw ApiError.BadRequest(
-        "Netinkamas lipduko formatas. Tikimasi CI=...;DI=...;II=..."
-      );
-    }
-
-    return { cycleId, departmentId, instrumentId };
-  }
-
   /**
    *
    * @returns Visus instrumentus išrikiuotus pagal instrument_code didėjimo tvarka
@@ -50,7 +13,7 @@ export default class InstrumentService {
   static async getAll() {
     return await prisma.instrument.findMany({
       orderBy: {
-        instrument_code: "asc",
+        instrument_code: 'asc',
       },
     });
   }
@@ -151,10 +114,15 @@ export default class InstrumentService {
    * @returns object {}
    */
   static async lookupInstrument(
-    stickerString: string
+    stickerString: string,
+    doc_id: string
   ): Promise<TScannedSticker> {
     const { cycleId, departmentId, instrumentId } =
-      this.parseStickerString(stickerString);
+      HelperService.parseStickerString(stickerString);
+
+    const docId = HelperService.toIntSafe(doc_id);
+
+    if (!docId) throw ApiError.BadRequest('Netinkamas dokumento id');
 
     const item = await prisma.sterilizationCycleItem.findFirst({
       where: {
@@ -171,20 +139,58 @@ export default class InstrumentService {
     });
 
     if (!item) {
-      throw ApiError.BadRequest("Nepavyko rasti instrumento");
+      throw ApiError.BadRequest('Nepavyko rasti instrumento');
     }
 
     const instrumentExpires = addDays(
       item.cycle.sterilization_date,
       item.instrument.instrument_exp
     );
+
+    // gauname medika ir pacienta pagal docId
+    const medicPacientData = await RawDbService.getDataByDocId(docId);
+
+    await this.saveUsedInstrument({
+      cycle_item_id: item.id,
+      doc_id: docId,
+      used_by: medicPacientData.EmployeeDuties ?? 'Nežinomas',
+      patient: medicPacientData.PersonName ?? 'Nežinomas',
+    });
+
     return {
       instrument_name: item.instrument.instrument_name,
-      expires: format(instrumentExpires, "yyyy-MM-dd"),
+      expires: format(instrumentExpires, 'yyyy-MM-dd'),
     };
   }
 
-  static async saveUsedInstruments(): Promise<string> {
-    return "save used instruments - ok";
+  private static async saveUsedInstrument(data: {
+    cycle_item_id: number;
+    doc_id: number;
+    used_by: string;
+    patient: string;
+  }): Promise<string> {
+    // Ar toks irasas jau yra?
+    const existing = await prisma.instrumentUsage.findUnique({
+      where: {
+        cycle_item_id: data.cycle_item_id,
+      },
+    });
+
+    if (existing) {
+      throw ApiError.Conflict(
+        `Šis instrumentas jau panaudotas (cycle_item_id=${data.cycle_item_id})`
+      );
+    }
+
+    await prisma.instrumentUsage.create({
+      data: {
+        cycle_item_id: data.cycle_item_id,
+        used_by: data.used_by,
+        patient: data.patient,
+        doc_id: data.doc_id,
+      },
+    });
+
+    return 'save used instruments - ok';
   }
 }
