@@ -71,13 +71,11 @@ export default class AdminService {
         sterilizedBy: nameMap.get(record.cycle.user_id) ?? record.cycle.user_id,
         sterilizedAt,
         expiresAt,
-        usedAt: record.usage?.usage_timestamp
-          ? format(record.usage?.usage_timestamp, 'yyyy-MM-dd')
+        usedAt: record.usage?.createdAt
+          ? format(record.usage?.createdAt, 'yyyy-MM-dd')
           : null,
-        usedBy: record.usage?.used_by_user_id
-          ? record.usage?.used_by_user_id
-          : null, // cia reiketu taip pat gauti mediku vardus
-        usedTo: record.usage?.patient_id ? record.usage?.patient_id : null,
+        usedBy: record.usage?.used_by ? record.usage?.used_by : null, // cia reiketu taip pat gauti mediku vardus
+        usedTo: record.usage?.patient ? record.usage?.patient : null,
       };
     });
 
