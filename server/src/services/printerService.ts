@@ -1,7 +1,7 @@
 import { TPrinter } from 'types';
 import { prisma } from '../config/prisma';
 import ApiError from '../errors/apiErrors';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../config/generated/prisma/client';
 
 export default class PrinterService {
   static async getAll() {
