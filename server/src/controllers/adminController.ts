@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import AdminService from '../services/adminService';
-import HelperService from '../services/helperService';
+import AdminService from '../services/adminService.js';
+import HelperService from '../services/helperService.js';
 
 export default class AdminController {
   static async getInstrumentUsageData(

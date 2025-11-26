@@ -1,6 +1,6 @@
-import { TNewSterilizer, TSterilizer } from 'types';
-import { prisma } from '../config/prisma';
-import ApiError from '../errors/apiErrors';
+import { prisma } from '../config/prisma.js';
+import ApiError from '../errors/apiErrors.js';
+import { TNewSterilizer, TSterilizer } from '../types/sterilization.js';
 
 export default class SterilizerService {
   static async getAll() {

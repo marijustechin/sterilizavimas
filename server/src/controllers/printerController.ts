@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import PrinterService from '../services/printerService';
+import PrinterService from '../services/printerService.js';
 
 export default class PrinterController {
   static async getAll(

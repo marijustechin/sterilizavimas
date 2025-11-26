@@ -1,4 +1,4 @@
-import PrinterController from '../controllers/printerController';
+import PrinterController from '../controllers/printerController.js';
 import express from 'express';
 
 const printerRouter = express.Router();

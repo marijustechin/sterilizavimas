@@ -1,17 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import errorMiddleware from './middlewares/errorMiddleware';
+import errorMiddleware from './middlewares/errorMiddleware.js';
 
 // Routers
-import userRouter from './routers/userRouter';
-import departmentRouter from './routers/departmentRouter';
-import instrumentRouter from './routers/instrumentRouter';
-import sterilizerRouter from './routers/sterilizerRouter';
-import sterilizationRouter from './routers/sterilizationRouter';
-import adminRouter from './routers/adminRouter';
-import printerRouter from './routers/printerRouter';
-import stickerRouter from './routers/stickerRouter';
+import userRouter from './routers/userRouter.js';
+import departmentRouter from './routers/departmentRouter.js';
+import instrumentRouter from './routers/instrumentRouter.js';
+import sterilizerRouter from './routers/sterilizerRouter.js';
+import sterilizationRouter from './routers/sterilizationRouter.js';
+import adminRouter from './routers/adminRouter.js';
+import printerRouter from './routers/printerRouter.js';
+import stickerRouter from './routers/stickerRouter.js';
 
 const app = express();
 

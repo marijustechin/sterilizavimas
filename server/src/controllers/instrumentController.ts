@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import InstrumentService from '../services/instrumentService';
+import InstrumentService from '../services/instrumentService.js';
 
 export default class InstrumentController {
   static async getAll(

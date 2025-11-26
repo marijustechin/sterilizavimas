@@ -1,10 +1,10 @@
-import { TSterilizationCyclePayload } from "types";
-import { prisma } from "../config/prisma";
-import { startOfDay, endOfDay } from "date-fns";
+import { prisma } from '../config/prisma.js';
+import { startOfDay, endOfDay } from 'date-fns';
 
-import ApiError from "../errors/apiErrors";
-import PrintingService from "./printingService";
-import SterilizationCycleRepository from "./SterilizationCycleRepository";
+import ApiError from '../errors/apiErrors.js';
+import PrintingService from './printingService.js';
+import SterilizationCycleRepository from './SterilizationCycleRepository.js';
+import { TSterilizationCyclePayload } from '../types/sterilization.js';
 
 export default class SterilizationService {
   static async getCycleNumber(sterilizerId: number): Promise<number> {
@@ -21,7 +21,7 @@ export default class SterilizationService {
         },
       },
       orderBy: {
-        cycle_number: "desc",
+        cycle_number: 'desc',
       },
     });
 
@@ -36,14 +36,14 @@ export default class SterilizationService {
       sterilizationCycleData.cycleNumber !==
       (await this.getCycleNumber(sterilizationCycleData.sterilizerId))
     ) {
-      throw ApiError.BadRequest("Neteisingas ciklo numeris");
+      throw ApiError.BadRequest('Neteisingas ciklo numeris');
     }
 
     // 2) printer check – ok
     const printerStatus = await PrintingService.CheckPrinterStatus(
       sterilizationCycleData.printerId
     );
-    if (printerStatus.status !== "ready") {
+    if (printerStatus.status !== 'ready') {
       throw ApiError.PrinterError(printerStatus.message);
     }
 
@@ -53,7 +53,7 @@ export default class SterilizationService {
         sterilizationCycleData
       );
     if (!saveResult.success || !saveResult.data) {
-      throw ApiError.BadRequest(saveResult.error || "Duomenų įrašymo klaida");
+      throw ApiError.BadRequest(saveResult.error || 'Duomenų įrašymo klaida');
     }
 
     // 4) spausdinam – perduodam VISUS items
@@ -61,8 +61,8 @@ export default class SterilizationService {
       sterilizationCycleData,
       saveResult.data.items // kiekvienas turės savo id/DI/II
     );
-    if (!printOk) throw ApiError.PrinterError("Spausdinimo klaida");
+    if (!printOk) throw ApiError.PrinterError('Spausdinimo klaida');
 
-    return { print: "success", save: "success" };
+    return { print: 'success', save: 'success' };
   }
 }

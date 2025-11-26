@@ -1,4 +1,4 @@
-import SterilizerController from '../controllers/sterilizerController';
+import SterilizerController from '../controllers/sterilizerController.js';
 import express from 'express';
 
 const sterilizerRouter = express.Router();

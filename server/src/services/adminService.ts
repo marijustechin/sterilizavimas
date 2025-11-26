@@ -1,9 +1,9 @@
 import { addDays, format } from 'date-fns';
-import { Prisma } from '@prisma/client';
-import { prisma } from '../config/prisma';
-import LdapService from './ldapService';
-import HelperService from './helperService';
-import { TAdminListFilters, TAdminRecord, TCycleDataResponse } from 'types';
+import { prisma } from '../config/prisma.js';
+import LdapService from './ldapService.js';
+import HelperService from './helperService.js';
+import { TAdminListFilters, TAdminRecord } from '../types/admin.js';
+import { Prisma } from '../config/generated/prisma/client.js';
 
 /**
  * Naudojama rikiavimui buildOrderByClause metode

@@ -1,5 +1,5 @@
-import { DocStatus } from '@prisma/client';
-import { TDepartment, TInstrument } from './sterilization';
+import { TDepartment, TInstrument } from './sterilization.js';
+import { DocStatus } from '../config/generated/prisma/enums.js';
 
 export type TAdminRecord = {
   id: number;

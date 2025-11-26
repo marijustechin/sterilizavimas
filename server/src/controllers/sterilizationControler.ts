@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import SterilizationService from "../services/sterilizationService";
-import { TSterilizationCyclePayload } from "types";
+import { NextFunction, Request, Response } from 'express';
+import SterilizationService from '../services/sterilizationService.js';
+import { TSterilizationCyclePayload } from '../types/sterilization.js';
 
 export default class SterilizationController {
   static async getCycleNumber(

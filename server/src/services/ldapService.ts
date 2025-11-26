@@ -1,8 +1,8 @@
 import { Client, EqualityFilter, OrFilter } from 'ldapts';
 import { stringify } from 'uuid';
-import ApiError from '../errors/apiErrors';
-import config from '../config/config';
-import { TldapUser } from 'types';
+import ApiError from '../errors/apiErrors.js';
+import config from '../config/config.js';
+import { TldapUser } from '../types/user.js';
 
 export default class LdapService {
   static convertUUIDToBinary(uuidStr: string): Buffer {

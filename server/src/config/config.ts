@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 interface IConfig {
   port: number;
   nodeEnv: string;
@@ -16,6 +19,13 @@ interface IConfig {
     db_host: string;
     db_user: string;
     db_chrset: string;
+  };
+
+  mainDb: {
+    dbHost: string;
+    dbName: string;
+    dbPass: string;
+    dbUser: string;
   };
 }
 
@@ -48,6 +58,13 @@ const config: IConfig = {
     db_name: validateEnvVar('DB_NAME_INTRANET'),
     db_pass: validateEnvVar('DB_PASS_INTRANET'),
     db_user: validateEnvVar('DB_USER_INTRANET'),
+  },
+
+  mainDb: {
+    dbHost: validateEnvVar('DB_HOST_MAIN'),
+    dbName: validateEnvVar('DB_NAME_MAIN'),
+    dbPass: validateEnvVar('DB_PASS_MAIN'),
+    dbUser: validateEnvVar('DB_USER_MAIN'),
   },
 };
 

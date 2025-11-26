@@ -1,5 +1,5 @@
-import { DocStatus } from '@prisma/client';
-import ApiError from '../errors/apiErrors';
+import { DocStatus } from '../config/generated/prisma/enums.js';
+import ApiError from '../errors/apiErrors.js';
 
 export default class HelperService {
   private static readonly BASE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import SterilizerService from '../services/sterilizerService';
+import SterilizerService from '../services/sterilizerService.js';
 
 export default class SterilizerController {
   static async getAll(

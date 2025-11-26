@@ -1,9 +1,10 @@
 // services/stickerService.ts
-import { TGetStickersResponse, TSterilizationCycleItem, TSticker } from 'types';
-import { prisma } from '../config/prisma';
-import { Prisma } from '@prisma/client';
-import ApiError from '../errors/apiErrors';
-import HelperService from './helperService';
+import { prisma } from '../config/prisma.js';
+import ApiError from '../errors/apiErrors.js';
+import HelperService from './helperService.js';
+import { TGetStickersResponse, TSticker } from '../types/sticker.js';
+import { TSterilizationCycleItem } from '../types/sterilization.js';
+import { Prisma } from '../config/generated/prisma/client.js';
 
 interface StickerFilter {
   limit?: string;

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import UserService from '../services/userService';
-import ApiError from '../errors/apiErrors';
+import UserService from '../services/userService.js';
+import ApiError from '../errors/apiErrors.js';
 
 export default class UserController {
   static async login(

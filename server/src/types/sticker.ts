@@ -1,4 +1,4 @@
-import { TDepartment, TInstrument } from './sterilization';
+import { TDepartment, TInstrument } from './sterilization.js';
 
 type TCycle = {
   id: number;
