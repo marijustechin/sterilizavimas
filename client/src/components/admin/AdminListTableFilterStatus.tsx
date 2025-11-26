@@ -24,6 +24,7 @@ export const AdminListTableFilterStatus = () => {
       className='text-sm font-light'
       defaultValue={'visi'}
       onChange={(e) => handleOnChange(e.target.value)}
+      id='filter_status'
     >
       <option value={'visi'}>Rodyti visus</option>
       <option value={'nepatvirtintas'}>Nepatvirtintas</option>

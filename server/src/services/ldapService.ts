@@ -24,18 +24,28 @@ export default class LdapService {
   }
 
   /**
-   * Role/Division extractor
+   * Role extractor
    * @param dn string
    * @returns object {role:string, division:string}
    */
-  static extractOrgInfoFromDN(dn: string) {
+  private static extractOrgInfoFromDN(dn: string) {
     const ouMatches = dn.match(/OU=([^,]+)/g); // randa visas OU reikšmes
+
     if (!ouMatches || ouMatches.length < 2) {
       return { division: 'unknown', role: 'unknown' };
     }
 
-    const role = ouMatches[0].replace('OU=', ''); // Pvz. 'Programuotojai'
-    const division = ouMatches[1].replace('OU=', ''); // Pvz. 'Subranga'
+    // Normalizuojam OU reikšmes
+    const ous = ouMatches.map((o) => o.replace('OU=', '').trim());
+
+    // Role logika
+    const role =
+      ous.includes('IT skyrius') || ous.includes('Programuotojai')
+        ? 'admin'
+        : 'user';
+
+    // Division – kaip anksčiau (OU[1])
+    const division = ous[1] || 'unknown';
 
     return { role, division };
   }
@@ -77,14 +87,13 @@ export default class LdapService {
 
   static async getDisplayNameByUserId(userId: string): Promise<string> {
     const url = `ldap://${config.ldap.ldap_server}`;
-    const searchBase = 'dc=karpol,dc=local'; // Pakeiskite į savo domeną
+    const searchBase = 'dc=karpol,dc=local';
     const client = new Client({ url });
 
     try {
       // Pirmiausiai, reikia prisijungti prie LDAP serverio.
       // Paprastai prieigai paieškai naudojamas atskiras vartotojas
       // arba "anonymous bind" leidžiama paieška.
-      // Jei jūsų LDAP reikalauja, čia reikės `client.bind(adminUser, adminPass);`
       await client.bind(config.ldap.ldap_user, config.ldap.ldap_password);
 
       const { searchEntries } = await client.search(searchBase, {
@@ -143,7 +152,6 @@ export default class LdapService {
       }
 
       const userEntry = searchEntries[0] as TldapUser;
-      console.log(userEntry);
 
       const displayName = userEntry.displayName;
       const userId = this.objectGUIDBufferToIDString(userEntry.objectGUID);
