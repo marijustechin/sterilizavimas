@@ -15,7 +15,7 @@ export type TAdminRecord = {
 
 export type TCycleDataResponse = {
   items: TAdminRecord[];
-  total: number;
-  page: number;
+  totalRecords: number;
+  currentPage: number;
   totalPages: number;
 };

@@ -94,6 +94,9 @@ const adminSlice = createSlice({
       state.sortOrder = action.payload.sortOrder;
       state.sortField = action.payload.sortField;
     },
+    setAdminListLimit: (state, action: PayloadAction<{ limit: number }>) => {
+      state.limit = action.payload.limit;
+    },
     setFilter: (state, action: PayloadAction<{ filter: string }>) => {
       state.filter = action.payload.filter;
     },
@@ -112,7 +115,7 @@ const adminSlice = createSlice({
           if (action.payload.items.length > 0) {
             state.cycleRecords = action.payload.items;
             state.totalPages = action.payload.totalPages;
-            state.totalCycleRecords = action.payload.total;
+            state.totalCycleRecords = action.payload.totalRecords;
           } else {
             state.cycleRecords = [];
             state.totalCycleRecords = 0;
@@ -131,6 +134,7 @@ export const {
   setCurrentPage,
   setAdminDocumentStatus,
   setAdminListSorting,
+  setAdminListLimit,
   setFilter,
 } = adminSlice.actions;
 
@@ -145,5 +149,8 @@ export const selectAdminListSortingField = (state: RootState) =>
   state.admin.sortField;
 export const selectAdminListSortingOrder = (state: RootState) =>
   state.admin.sortOrder;
+
+export const selectAdminListTotalRecords = (state: RootState) =>
+  state.admin.totalCycleRecords;
 
 export default adminSlice.reducer;

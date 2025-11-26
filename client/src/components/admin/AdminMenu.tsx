@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router';
 import type { IconType } from 'react-icons/lib';
 import { MdDashboard } from 'react-icons/md';
 import { AiFillPrinter } from 'react-icons/ai';
+import { FaBug } from 'react-icons/fa';
 
 interface IAdminMenuLink {
   name: string;
@@ -20,6 +21,7 @@ export const AdminMenu = () => {
       link: '/admin/spausdintuvai',
       icon: AiFillPrinter,
     },
+    { name: 'Sterilizavimas', link: '/sterilizavimas', icon: FaBug },
   ];
 
   return (

@@ -1,4 +1,5 @@
 import { Search } from '../Search';
+import { AdminListSelectInPage } from './AdminListSelectInPage';
 
 export const AdminListFilters = () => {
   const handleSarchByPacient = (text: string) => {
@@ -7,6 +8,8 @@ export const AdminListFilters = () => {
 
   return (
     <section className='flex gap-3 items-center border-b border-gray-200 py-1'>
+      <AdminListSelectInPage />
+
       <Search
         width={40}
         placeholderText='Paieška pagal kažką'
