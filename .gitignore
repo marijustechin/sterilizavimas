@@ -32,4 +32,4 @@ deploy.js
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 
-/src/generated/prisma
+server/src/config/generated/prisma
