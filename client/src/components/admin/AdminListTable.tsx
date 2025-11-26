@@ -1,4 +1,3 @@
-import { MdMore } from 'react-icons/md';
 import type { TAdminRecord } from '../../types';
 import { AdminListTableFilterStatus } from './AdminListTableFilterStatus';
 import { AdminListTableSorting } from './AdminListTableSorting';
