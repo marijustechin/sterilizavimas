@@ -23,7 +23,7 @@ export const AdminMenu = () => {
   ];
 
   return (
-    <nav className='w-full flex items-center justify-end gap-5'>
+    <nav className='flex items-center justify-end gap-4 mb-2 bg-gray-200 rounded-lg py-1 px-2'>
       <div className='flex gap-3 items-center'>
         {topMenuLinks.map(({ name, link, icon: Icon }) => (
           <Link

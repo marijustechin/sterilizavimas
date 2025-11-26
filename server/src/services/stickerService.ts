@@ -3,6 +3,7 @@ import { TGetStickersResponse, TSterilizationCycleItem, TSticker } from 'types';
 import { prisma } from '../config/prisma';
 import { Prisma } from '@prisma/client';
 import ApiError from '../errors/apiErrors';
+import HelperService from './helperService';
 
 interface StickerFilter {
   limit?: string;
@@ -17,30 +18,19 @@ interface StickerFilter {
 export default class StickerService {
   /**
    *
-   * @param v number as string
-   * @returns number | undefined
-   */
-  private static toIntSafe(v?: string): number | undefined {
-    if (v === undefined) return undefined;
-    const n = Number.parseInt(v, 10);
-    return Number.isFinite(n) ? n : undefined;
-  }
-
-  /**
-   *
    * @param filters
    * @returns
    */
   static async getAll(filters: StickerFilter): Promise<TGetStickersResponse> {
-    const limit = this.toIntSafe(filters.limit) ?? 15;
-    const currentPage = this.toIntSafe(filters.currentPage) ?? 1;
+    const limit = HelperService.toIntSafe(filters.limit) ?? 15;
+    const currentPage = HelperService.toIntSafe(filters.currentPage) ?? 1;
     // Apskaičiuojame, kiek įrašų praleisti
     const skip = (currentPage - 1) * limit;
     // pradinis where objektas
     const where: Prisma.SterilizationCycleItemWhereInput = {};
 
     // 1. FILTRAVIMAS PAGAL DEPARTAMENTĄ (DEPARTMENT CODE)
-    const departmentCode = this.toIntSafe(filters.departmentCode);
+    const departmentCode = HelperService.toIntSafe(filters.departmentCode);
     if (departmentCode !== undefined) {
       // Ryšio filtravimas: department yra to-one, naudojame `is`
       where.department = {
@@ -52,7 +42,7 @@ export default class StickerService {
     }
 
     // 2. FILTRAVIMAS PAGAL INSTRUMENTĄ (INSTRUMENT CODE)
-    const instrumentCode = this.toIntSafe(filters.instrumentCode);
+    const instrumentCode = HelperService.toIntSafe(filters.instrumentCode);
     if (instrumentCode !== undefined) {
       // Ryšio filtravimas: instrument yra to-one, naudojame `is`
       where.instrument = {
@@ -64,7 +54,7 @@ export default class StickerService {
     }
 
     // 3. FILTRAVIMAS PAGAL CIKLO NUMERĮ (CYCLENUMBER)
-    const cycleNumber = this.toIntSafe(filters.cycleNumber);
+    const cycleNumber = HelperService.toIntSafe(filters.cycleNumber);
     if (cycleNumber !== undefined) {
       // Ryšio filtravimas: cycle yra to-one, naudojame `is`
       where.cycle = {

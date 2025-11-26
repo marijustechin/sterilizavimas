@@ -13,11 +13,13 @@ interface IAdminState {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   currentPage: number;
-  sort: string;
+  sortField: string;
+  sortOrder: string;
   filter: string;
   limit: number;
   totalCycleRecords: number;
   totalPages: number;
+  docStatus: string;
 }
 
 const initialState: IAdminState = {
@@ -25,11 +27,13 @@ const initialState: IAdminState = {
   status: 'idle',
   error: null,
   currentPage: 1,
-  sort: '',
+  sortOrder: '',
+  sortField: '',
   filter: '',
   limit: 10,
   totalPages: 0,
   totalCycleRecords: 0,
+  docStatus: '',
 };
 
 ///////////////////////////////////////////////////
@@ -44,19 +48,25 @@ export const getCycleRecords = createAsyncThunk<
   try {
     const state = getState();
     const currentPage = state.admin.currentPage;
-    const sort = state.admin.sort;
+    const sortOrder = state.admin.sortOrder;
+    const sortField = state.admin.sortField;
     const limit = state.admin.limit;
     const filter = state.admin.filter;
+    const docStatus = state.admin.docStatus;
 
     const query =
-      '?page=' +
+      '?currentPage=' +
       currentPage +
       '&limit=' +
       limit +
-      '&sort=' +
-      sort +
+      '&sortOrder=' +
+      sortOrder +
+      '&sortField=' +
+      sortField +
       '&filter=' +
-      filter;
+      filter +
+      '&docStatus=' +
+      docStatus;
 
     return await AdminService.getCycleRecords(query);
   } catch (error) {
@@ -68,11 +78,21 @@ const adminSlice = createSlice({
   name: 'admin',
   initialState,
   reducers: {
+    setAdminDocumentStatus: (
+      state,
+      action: PayloadAction<{ status: string }>
+    ) => {
+      state.docStatus = action.payload.status;
+    },
     setCurrentPage: (state, action: PayloadAction<{ current: number }>) => {
       state.currentPage = action.payload.current;
     },
-    setSorting: (state, action: PayloadAction<{ sort: string }>) => {
-      state.sort = action.payload.sort;
+    setAdminListSorting: (
+      state,
+      action: PayloadAction<{ sortOrder: string; sortField: string }>
+    ) => {
+      state.sortOrder = action.payload.sortOrder;
+      state.sortField = action.payload.sortField;
     },
     setFilter: (state, action: PayloadAction<{ filter: string }>) => {
       state.filter = action.payload.filter;
@@ -107,7 +127,12 @@ const adminSlice = createSlice({
   },
 });
 
-export const { setCurrentPage, setSorting, setFilter } = adminSlice.actions;
+export const {
+  setCurrentPage,
+  setAdminDocumentStatus,
+  setAdminListSorting,
+  setFilter,
+} = adminSlice.actions;
 
 export const selectCycleRecords = (state: RootState) =>
   state.admin.cycleRecords;
@@ -115,5 +140,10 @@ export const selectCycleRecords = (state: RootState) =>
 export const selectAdminStatus = (state: RootState) => state.admin.status;
 export const getTotalPages = (state: RootState) => state.admin.totalPages;
 export const getCurrentPage = (state: RootState) => state.admin.currentPage;
+// sorting
+export const selectAdminListSortingField = (state: RootState) =>
+  state.admin.sortField;
+export const selectAdminListSortingOrder = (state: RootState) =>
+  state.admin.sortOrder;
 
 export default adminSlice.reducer;

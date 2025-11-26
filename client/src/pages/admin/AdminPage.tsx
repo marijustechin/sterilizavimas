@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Pagination } from '../../components/Pagination';
-import { Search } from '../../components/Search';
 import {
   getCurrentPage,
   getCycleRecords,
@@ -10,7 +9,8 @@ import {
   setCurrentPage,
 } from '../../store/features/adminSlice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
-import { MdMore } from 'react-icons/md';
+import { AdminListFilters } from '../../components/admin/AdminListFilters';
+import { AdminListTable } from '../../components/admin/AdminListTable';
 
 export const AdminPage = () => {
   const dispatch = useAppDispatch();
@@ -23,10 +23,6 @@ export const AdminPage = () => {
     if (adminStatus === 'idle') dispatch(getCycleRecords());
   }, [adminStatus, dispatch]);
 
-  const onSearch = (searchText: string) => {
-    console.log(searchText);
-  };
-
   const handlePageChange = (page: number) => {
     dispatch(setCurrentPage({ current: page }));
     dispatch(getCycleRecords());
@@ -34,45 +30,13 @@ export const AdminPage = () => {
 
   return (
     <main className='flex flex-col gap-4'>
-      <section>
-        <Search
-          width={40}
-          placeholderText='Paieška pagal kažką'
-          onSearch={(text) => onSearch(text)}
-        />
-      </section>
-      <section>
-        <table className='w-full text-left mt-5'>
-          <thead className='uppercase bg-slate-200 text-center'>
-            <tr>
-              <th>Instrumentas</th>
-              <th>Skyrius</th>
-              <th>Sterilizuotas</th>
-              <th>Panaudotas</th>
-              <th>Medikas</th>
-              <th>Pacientas</th>
-              <th>-</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cycleRecords.map((record) => (
-              <tr key={record.id}>
-                <td>{record.instrument.instrument_name}</td>
-                <td>{record.department.department_name}</td>
-                <td className='text-center'>{record.sterilizedAt}</td>
-                <td className='text-center'>2025-11-12</td>
-                <td>{record.sterilizedBy}</td>
-                <td className='text-center'>Paciento ID</td>
-                <td>
-                  <button>
-                    <MdMore className='text-red-950' size={24} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      {/* Filtrai */}
+      <AdminListFilters />
+
+      {/* Sarasas */}
+      <AdminListTable cycleRecords={cycleRecords} />
+
+      {/* Puslapiai */}
       <Pagination
         onChange={(current) => handlePageChange(current)}
         totalPages={totalPages}

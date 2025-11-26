@@ -1,3 +1,4 @@
+import { DocStatus } from '@prisma/client';
 import { TDepartment, TInstrument } from './sterilization';
 
 export type TAdminRecord = {
@@ -10,6 +11,7 @@ export type TAdminRecord = {
   usedAt: string | null;
   usedBy: string | null;
   usedTo: string | null;
+  docStatus: DocStatus | null;
 };
 
 export type TCycleDataResponse = {
@@ -17,4 +19,15 @@ export type TCycleDataResponse = {
   total: number;
   page: number;
   totalPages: number;
+};
+
+export type TAdminListFilters = {
+  limit?: string;
+  currentPage?: string;
+  sortOrder?: string;
+  sortField?: string;
+  docStatus?: DocStatus;
+  searchString?: string;
+  searchField?: string;
+  success?: string;
 };

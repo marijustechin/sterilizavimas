@@ -1,29 +1,35 @@
 import { NextFunction, Request, Response } from 'express';
 import AdminService from '../services/adminService';
+import HelperService from '../services/helperService';
 
 export default class AdminController {
-  static async getSterilizationData(
+  static async getInstrumentUsageData(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const { page, limit, sort, filter } = req.query;
+      const q = req.query as Record<string, string | string[] | undefined>;
 
-      // Patikriname ir konvertuojame parametrus į tinkamą formatą
-      const pageNumber = typeof page === 'string' ? Number(page) : 1;
-      const limitNumber = typeof limit === 'string' ? Number(limit) : 10;
-      const sortValue = typeof sort === 'string' ? sort : 'instrument:asc';
-      const filterValue = typeof filter === 'string' ? filter : '';
+      const first = (v?: string | string[]) => {
+        if (!v) return undefined;
+        return Array.isArray(v) ? v[0] : v;
+      };
 
-      const sterilizationData = await AdminService.getSterilizationData(
-        pageNumber,
-        limitNumber,
-        sortValue,
-        filterValue
-      );
+      const filters = {
+        limit: first(q.limit),
+        currentPage: first(q.currentPage),
+        sortOrder: first(q.sortOrder),
+        sortField: first(q.sortField),
+        docStatus: HelperService.isValidDocStatus(first(q.docStatus)),
+        searchString: first(q.searchString),
+        searchField: first(q.searchField),
+        success: first(q.success),
+      };
 
-      res.status(200).json(sterilizationData);
+      const result = await AdminService.getInstrumentUsageData(filters);
+
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }

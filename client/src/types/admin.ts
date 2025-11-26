@@ -10,6 +10,7 @@ export type TAdminRecord = {
   usedAt: string | null;
   usedBy: string | null;
   usedTo: string | null;
+  docStatus: string | null;
 };
 
 export type TCycleDataResponse = {

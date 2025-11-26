@@ -1,3 +1,4 @@
+import { DocStatus } from '@prisma/client';
 import ApiError from '../errors/apiErrors';
 
 export default class HelperService {
@@ -95,5 +96,23 @@ export default class HelperService {
     }
 
     return { cycleId, departmentId, instrumentId };
+  }
+
+  /**
+   * Patikrina, ar eilutė yra DocStatus reikšmė, ir ją konvertuoja.
+   */
+  static isValidDocStatus(value: string | undefined): DocStatus | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    const statusKey = value as DocStatus;
+
+    // Patikriname, ar reikšmė egzistuoja enum'e
+    if (Object.values(DocStatus).includes(statusKey)) {
+      return statusKey;
+    }
+
+    return undefined;
   }
 }

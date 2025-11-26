@@ -3,6 +3,6 @@ import express from 'express';
 
 const adminRouter = express.Router();
 
-adminRouter.get('/sterilization', AdminController.getSterilizationData);
+adminRouter.get('/usage', AdminController.getInstrumentUsageData);
 
 export default adminRouter;
