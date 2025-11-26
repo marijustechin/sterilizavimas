@@ -1,12 +1,13 @@
 import * as net from 'net';
+
+import { addDays, format } from 'date-fns';
+import { prisma } from '../config/prisma.js';
+import ApiError from '../errors/apiErrors.js';
+import { TPrinterStatus } from '../types/printer.js';
 import {
   TPrintedItem,
-  TPrinterStatus,
   TSterilizationCyclePayload,
-} from 'types';
-import { addDays, format } from 'date-fns';
-import { prisma } from '../config/prisma';
-import ApiError from '../errors/apiErrors';
+} from '../types/sterilization.js';
 
 export default class PrintingService {
   // patikriname ar spausdintuvas pasirengęs darbui

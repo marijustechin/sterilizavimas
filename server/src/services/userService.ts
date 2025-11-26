@@ -1,9 +1,9 @@
-import TokenService from './tokenService';
-import ApiError from '../errors/apiErrors';
+import TokenService from './tokenService.js';
+import ApiError from '../errors/apiErrors.js';
 import { JwtPayload } from 'jsonwebtoken';
-import { prisma } from '../config/prisma';
-import LdapService from './ldapService';
-import { TUser } from 'types';
+import { prisma } from '../config/prisma.js';
+import LdapService from './ldapService.js';
+import { TUser } from '../types/user.js';
 
 export default class UserService {
   /**

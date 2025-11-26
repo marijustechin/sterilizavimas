@@ -1,7 +1,7 @@
 // SterilizationCycleRepository.ts
-import { TSterilizationCyclePayload } from 'types';
-import { prisma } from '../config/prisma';
-import HelperService from './helperService';
+import { prisma } from '../config/prisma.js';
+import { TSterilizationCyclePayload } from '../types/sterilization.js';
+import HelperService from './helperService.js';
 
 export default class SterilizationCycleRepository {
   static async createSterilizationCycle(payload: TSterilizationCyclePayload) {

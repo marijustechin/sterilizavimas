@@ -1,9 +1,10 @@
-import { TInstrument, TNewInstrument, TScannedSticker } from 'types';
-import { prisma } from '../config/prisma';
-import ApiError from '../errors/apiErrors';
+import { prisma } from '../config/prisma.js';
+import ApiError from '../errors/apiErrors.js';
 import { addDays, format } from 'date-fns';
-import HelperService from './helperService';
-import RawDbService from './rawDbService';
+import HelperService from './helperService.js';
+import RawDbService from './rawDbService.js';
+import { TInstrument, TNewInstrument } from '../types/sterilization.js';
+import { TScannedSticker } from '../types/medic.js';
 
 export default class InstrumentService {
   /**

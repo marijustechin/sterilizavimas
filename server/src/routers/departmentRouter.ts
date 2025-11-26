@@ -1,4 +1,4 @@
-import DepartmentController from '../controllers/departmentController';
+import DepartmentController from '../controllers/departmentController.js';
 import express from 'express';
 
 const departmentRouter = express.Router();

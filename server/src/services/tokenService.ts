@@ -1,6 +1,6 @@
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 import { StringValue } from 'ms';
-import ApiError from '../errors/apiErrors';
+import ApiError from '../errors/apiErrors.js';
 
 export default class TokenService {
   private static readonly accessSecret = process.env.JWT_ACCESS_SECRET;

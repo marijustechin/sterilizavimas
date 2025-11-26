@@ -1,6 +1,6 @@
 // controllers/stickerController.ts
 import { NextFunction, Request, Response } from 'express';
-import StickerService from '../services/stickerService';
+import StickerService from '../services/stickerService.js';
 
 export default class StickerController {
   static async getAll(

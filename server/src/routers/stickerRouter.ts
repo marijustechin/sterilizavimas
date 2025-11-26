@@ -1,5 +1,5 @@
 import express from 'express';
-import StickerController from '../controllers/stickerController';
+import StickerController from '../controllers/stickerController.js';
 
 const stickerRouter = express.Router();
 

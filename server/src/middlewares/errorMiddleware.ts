@@ -1,4 +1,4 @@
-import ApiError from '../errors/apiErrors';
+import ApiError from '../errors/apiErrors.js';
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 
 const errorMiddleware: ErrorRequestHandler = (

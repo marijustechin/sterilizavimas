@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import DepartmentService from '../services/departmentService';
+import DepartmentService from '../services/departmentService.js';
 
 export default class DepartmentController {
   static async getAll(
