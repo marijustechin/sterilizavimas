@@ -5,6 +5,7 @@ import HelperService from './helperService.js';
 import RawDbService from './rawDbService.js';
 import { TInstrument, TNewInstrument } from '../types/sterilization.js';
 import { TScannedSticker } from '../types/medic.js';
+import { DocStatus } from '../config/generated/prisma/enums.js';
 
 export default class InstrumentService {
   /**
@@ -164,6 +165,50 @@ export default class InstrumentService {
     };
   }
 
+  static async scannerCheckExistingInstruments(docId: string) {
+    const doc_id = HelperService.toIntSafe(docId);
+    if (!doc_id) throw ApiError.BadRequest('Neteisingas dokumento ID');
+
+    // Paimam visus nepatvirtintus instrumentus
+    const usages = await prisma.instrumentUsage.findMany({
+      where: { doc_id, doc_status: 'nepatvirtintas' },
+    });
+
+    if (usages.length === 0) return [];
+
+    // Visi ciklo item ID vienoje vietoje
+    const ids = usages.map((u) => u.cycle_item_id);
+
+    // Paimam visus reikalingus ciklo item duomenis vienu SELECT
+    const items = await prisma.sterilizationCycleItem.findMany({
+      where: { id: { in: ids } },
+      include: {
+        instrument: true,
+        department: true,
+        cycle: true,
+      },
+    });
+
+    // Formuojame atsakymą
+    return items.map((item) => {
+      const { id, instrument, department, cycle } = item;
+
+      const stickerString = `CI=${id};DI=${department.department_code};II=${instrument.instrument_code}`;
+      const expires = addDays(
+        cycle.sterilization_date,
+        instrument.instrument_exp
+      );
+
+      return {
+        stickerString,
+        stickerData: {
+          instrument_name: instrument.instrument_name,
+          expires: format(expires, 'yyyy-MM-dd'),
+        },
+      };
+    });
+  }
+
   private static async saveUsedInstrument(data: {
     cycle_item_id: number;
     doc_id: number;
@@ -193,5 +238,30 @@ export default class InstrumentService {
     });
 
     return 'save used instruments - ok';
+  }
+
+  static async setUsedInstrumentStatus(docId: string, status: string) {
+    // 1. Tikriname ar status atitinka enum
+    if (!Object.values(DocStatus).includes(status as DocStatus))
+      throw ApiError.BadRequest('Neteisinga dokumento būsena');
+
+    // 2. Ar teisinga docId
+    const doc_id = HelperService.toIntSafe(docId);
+    if (!doc_id) throw ApiError.BadRequest('Neteisingas dokumento ID');
+
+    // result = { count: number }
+    const result = await prisma.instrumentUsage.updateMany({
+      where: {
+        doc_id,
+      },
+      data: {
+        doc_status: status as DocStatus,
+      },
+    });
+
+    console.log(
+      `InstrumentService (line 263) debug: status->${status}, doc_id->${doc_id}, updatedRecords: ${result.count}`
+    );
+    return { status: status, doc_id: docId, updatedRecords: result.count };
   }
 }

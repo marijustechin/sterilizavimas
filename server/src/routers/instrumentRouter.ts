@@ -8,6 +8,10 @@ instrumentRouter.delete('/:id', InstrumentController.delete);
 instrumentRouter.patch('/', InstrumentController.patch);
 instrumentRouter.post('/', InstrumentController.create);
 instrumentRouter.post('/lookup', InstrumentController.lookupInstrument);
-instrumentRouter.post('/usage', InstrumentController.saveUsedInstruments);
+instrumentRouter.post(
+  '/checkall',
+  InstrumentController.scannerCheckExistingInstruments
+);
+instrumentRouter.post('/status', InstrumentController.setUsedInstrumentStatus);
 
 export default instrumentRouter;
