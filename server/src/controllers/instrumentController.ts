@@ -92,13 +92,47 @@ export default class InstrumentController {
     }
   }
 
-  static async saveUsedInstruments(
+  /**
+   * Atsako i skaitytuvo uzklausa
+   * ar nera jau nuskatytu, bet nepatvirtintu dokumentu
+   * @param req
+   * @param res
+   * @param next
+   */
+  static async scannerCheckExistingInstruments(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      res.status(200).json({ message: 'Save used instruments: ok' });
+      const { docId } = req.body;
+
+      const result = await InstrumentService.scannerCheckExistingInstruments(
+        docId
+      );
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async setUsedInstrumentStatus(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { docId, status } = req.body;
+
+      const setStatusResult = await InstrumentService.setUsedInstrumentStatus(
+        docId,
+        status
+      );
+
+      res.status(200).json({
+        setStatusResult: setStatusResult,
+      });
     } catch (error) {
       next(error);
     }

@@ -1,5 +1,5 @@
-import { MdOutlinePrint } from "react-icons/md";
-import { useAppDispatch, useAppSelector } from "../../store/store";
+import { MdOutlinePrint } from 'react-icons/md';
+import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   fetchNextCycleNumber,
   resetSterilizationState,
@@ -8,18 +8,18 @@ import {
   selectTotalLabels,
   setMessage,
   setPrintingPreview,
-} from "../../store/features/sterilizationSlice";
-import toast from "react-hot-toast";
-import SterilizationService from "../../services/sterilizationService";
+} from '../../store/features/sterilizationSlice';
+import toast from 'react-hot-toast';
+import SterilizationService from '../../services/sterilizationService';
 import type {
   TInstrumentsOfDepartment,
   TSterilizationCyclePayload,
-} from "../../types";
-import { selectUser } from "../../store/features/authSlice";
-import { useLocation } from "react-router";
-import HelperService from "../../services/helperService";
-import { selectDepartements } from "../../store/features/departmentSlice";
-import { useState } from "react";
+} from '../../types';
+import { selectUser } from '../../store/features/authSlice';
+import { useLocation } from 'react-router';
+import HelperService from '../../services/helperService';
+import { selectDepartements } from '../../store/features/departmentSlice';
+import { useState } from 'react';
 
 export const ButtonPrint = () => {
   const dispatch = useAppDispatch();
@@ -28,7 +28,7 @@ export const ButtonPrint = () => {
   const departments = useAppSelector(selectDepartements);
   const user = useAppSelector(selectUser);
   const totalLabels = useAppSelector(selectTotalLabels);
-  const printerId: number = Number(localStorage.getItem("selectedPrinter"));
+  const printerId: number = Number(localStorage.getItem('selectedPrinter'));
 
   const location = useLocation();
 
@@ -36,12 +36,12 @@ export const ButtonPrint = () => {
 
   const handlePrintAction = async () => {
     if (!sterilizerId) {
-      toast.error("Prašome pasirinkti sterilizatorių!");
+      toast.error('Prašome pasirinkti sterilizatorių!');
       return;
     }
 
     if (instruments.length < 1) {
-      toast.error("Prašome pasirinkti skyrius ir instrumentus!");
+      toast.error('Prašome pasirinkti skyrius ir instrumentus!');
       return;
     }
 
@@ -49,13 +49,13 @@ export const ButtonPrint = () => {
       // Šita klaida beveik neįmanoma - šitą sąlygą naudoju tik dėl to,
       // kad nemestų klaidos typescript inicijuojant
       // sterilizationCycleData.userId
-      toast.error("Neprisijungęs naudotojas");
+      toast.error('Neprisijungęs naudotojas');
       return;
     }
 
     if (!printerId) {
       toast.error(
-        "Nesukonfigūruotas spausdintuvas. Prašome pasirinkti spausdintuvą arba kreiptis į administratorių"
+        'Nesukonfigūruotas spausdintuvas. Prašome pasirinkti spausdintuvą arba kreiptis į administratorių'
       );
       return;
     }
@@ -109,15 +109,15 @@ export const ButtonPrint = () => {
     // 2. Siunčiame duomenis į backend
     // spausdinimui ir įrašymui į DB
     dispatch(
-      setMessage({ message: "Vyksta spausdinimas ir įrašymas duomenų bazę..." })
+      setMessage({ message: 'Vyksta spausdinimas ir įrašymas duomenų bazę...' })
     );
 
     try {
       await SterilizationService.saveSterilizationCycle(sterilizationCycleData);
 
       // dar čia reikia nunulinti redux būseną
-      toast.success("Duomenys sėkmingai įrašyti");
-      dispatch(setMessage({ message: "" }));
+      toast.success('Duomenys sėkmingai įrašyti');
+      dispatch(setMessage({ message: '' }));
       dispatch(resetSterilizationState());
     } catch (error) {
       toast.error(HelperService.errorToString(error));
@@ -126,16 +126,19 @@ export const ButtonPrint = () => {
     setPrintDisabled(false);
   };
 
-  if (location.pathname === "/sterilizavimas") {
+  if (location.pathname === '/sterilizavimas') {
     return (
       <button
         disabled={printDisabled}
-        type="button"
-        className="flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500"
+        type='button'
+        className='flex gap-1 items-center p-2 rounded-lg bg-emerald-300 cursor-pointer hover:bg-emerald-500'
         onClick={handlePrintAction}
       >
         <MdOutlinePrint size={20} />
-        Spausdinti ({totalLabels})
+        Spausdinti
+        <span className='font-semibold text-lg text-black bg-emerald-50 px-1 rounded-md'>
+          {totalLabels}
+        </span>
       </button>
     );
   } else {
