@@ -152,11 +152,23 @@ export default class InstrumentService {
     // gauname medika ir pacienta pagal docId
     const medicPacientData = await RawDbService.getDataByDocId(docId);
 
+    if (!medicPacientData.result)
+      throw ApiError.BadRequest('Nepavyko rasti mediko ir paciento');
+
+    const doc_status: Record<string, DocStatus> = {
+      PENDING: DocStatus.nepatvirtintas,
+      SUSPENDED: DocStatus.anuliuotas,
+      CANCELED: DocStatus.atšauktas,
+      SIGNED: DocStatus.patvirtintas,
+    };
+
     await this.saveUsedInstrument({
       cycle_item_id: item.id,
       doc_id: docId,
-      used_by: medicPacientData.EmployeeDuties ?? 'Nežinomas',
-      patient: medicPacientData.PersonName ?? 'Nežinomas',
+      used_by: medicPacientData.result.EmployeeDuties || 'Nežinomas',
+      patient: medicPacientData.result.PersonName || 'Nežinomas',
+      doc_status:
+        doc_status[medicPacientData.doc_status] || DocStatus.nepatvirtintas,
     });
 
     return {
@@ -212,6 +224,7 @@ export default class InstrumentService {
   private static async saveUsedInstrument(data: {
     cycle_item_id: number;
     doc_id: number;
+    doc_status: DocStatus;
     used_by: string;
     patient: string;
   }): Promise<string> {
@@ -234,6 +247,7 @@ export default class InstrumentService {
         used_by: data.used_by,
         patient: data.patient,
         doc_id: data.doc_id,
+        doc_status: data.doc_status,
       },
     });
 

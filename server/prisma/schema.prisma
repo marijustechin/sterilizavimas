@@ -14,10 +14,10 @@ datasource db {
 }
 
 enum DocStatus {
-  nepatvirtintas
-  patvirtintas
-  atšauktas
-  panaikintas
+  nepatvirtintas // PENDING
+  patvirtintas // SIGNED
+  atšauktas // CANCELED
+  anuliuotas // SUSPENDED
 }
 
 model Instrument {

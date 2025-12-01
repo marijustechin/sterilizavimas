@@ -5,6 +5,8 @@ import {
 } from '../../store/features/adminSlice';
 import { useAppDispatch } from '../../store/store';
 
+import { DocStatus } from '../../../../server/src/config/generated/prisma/enums';
+
 export const AdminListTableFilterStatus = () => {
   const dispatch = useAppDispatch();
 
@@ -21,16 +23,18 @@ export const AdminListTableFilterStatus = () => {
 
   return (
     <select
-      className='text-sm font-light'
-      defaultValue={'visi'}
+      className='text-sm font-light text-black bg-gray-100 rounded-t-md focus:outline-0'
+      defaultValue='visi'
       onChange={(e) => handleOnChange(e.target.value)}
       id='filter_status'
     >
-      <option value={'visi'}>Rodyti visus</option>
-      <option value={'nepatvirtintas'}>Nepatvirtintas</option>
-      <option value={'patvirtintas'}>Patvirtintas</option>
-      <option value={'atšauktas'}>Atšauktas</option>
-      <option value={'panaikintas'}>Panaikintas</option>
+      <option value='visi'>Rodyti visus</option>
+      {Object.values(DocStatus).map((status) => (
+        <option key={status} value={status}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}{' '}
+          {/* pirmą raidę didžiąja */}
+        </option>
+      ))}
     </select>
   );
 };
