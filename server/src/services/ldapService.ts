@@ -30,6 +30,7 @@ export default class LdapService {
    */
   private static extractOrgInfoFromDN(dn: string) {
     const ouMatches = dn.match(/OU=([^,]+)/g); // randa visas OU reikšmes
+    console.log('LdapService 33: ', ouMatches);
 
     if (!ouMatches || ouMatches.length < 2) {
       return { division: 'unknown', role: 'unknown' };
@@ -140,7 +141,13 @@ export default class LdapService {
       const { searchEntries } = await client.search(searchBase, {
         scope: 'sub',
         filter: `(sAMAccountName=${username})`,
-        attributes: ['displayName', 'objectGUID'], // kol kas imam tik šiuos atributus
+        // kol kas imam tik šiuos atributus
+        // attributes: [
+        //   'displayName', // Vardas pavarde
+        //   'objectGUID',
+        //   'sAMAccountName', // username
+        // ],
+        attributes: ['*'],
         // *** SVARBU: ldapts kazka padaro su objectGUID, todel reikia naudoti explicitBufferAttributes ***
         explicitBufferAttributes: ['objectGUID'], // Nurodome, kad objectGUID yra dvejetainis ir norime jį gauti kaip Buffer
       });
@@ -152,6 +159,7 @@ export default class LdapService {
       }
 
       const userEntry = searchEntries[0] as TldapUser;
+      console.log('LdapService 156: ', userEntry);
 
       const displayName = userEntry.displayName;
       const userId = this.objectGUIDBufferToIDString(userEntry.objectGUID);

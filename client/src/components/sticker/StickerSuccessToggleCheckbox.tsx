@@ -1,5 +1,6 @@
+import { selectUser } from '../../store/features/authSlice';
 import { toggleStickerSuccess } from '../../store/features/stickerSlice';
-import { useAppDispatch } from '../../store/store';
+import { useAppDispatch, useAppSelector } from '../../store/store';
 
 interface StickerSuccessToggleCheckboxProps {
   short_code: string;
@@ -10,9 +11,13 @@ export const StickerSuccessToggleCheckbox: React.FC<
   StickerSuccessToggleCheckboxProps
 > = ({ success, short_code }) => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
 
   const toggleSuccess = () => {
-    dispatch(toggleStickerSuccess({ short_code: short_code }));
+    if (user?.userId)
+      dispatch(
+        toggleStickerSuccess({ short_code: short_code, user_id: user.userId })
+      );
   };
 
   return (

@@ -8,6 +8,7 @@ import {
   setFilterInstrumentId,
   setFilterLimit,
   setFilterSearchString,
+  setSticerListCurrentPage,
 } from '../../store/features/stickerSlice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
 import { StickerSearch } from '../sticker/StickerSearch';
@@ -43,6 +44,7 @@ export const StickerListFilter = () => {
   };
 
   const handleOnSearch = (text: string) => {
+    dispatch(setSticerListCurrentPage({ current: 1 }));
     dispatch(setFilterSearchString({ text: text }));
     dispatch(getStickers());
   };

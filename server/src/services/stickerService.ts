@@ -5,6 +5,7 @@ import HelperService from './helperService.js';
 import { TGetStickersResponse, TSticker } from '../types/sticker.js';
 import { TSterilizationCycleItem } from '../types/sterilization.js';
 import { Prisma } from '../config/generated/prisma/client.js';
+import LdapService from './ldapService.js';
 
 interface StickerFilter {
   limit?: string;
@@ -90,6 +91,30 @@ export default class StickerService {
       },
     });
 
+    // jei rodyti tik blogus IR jei stickers yra irasu,
+    // atliekame papildomus veiksmus:
+    // gauname DispalyNames pagal successPerson (id)
+    if (filters.onlyDefected === 'true' && stickers.length > 0) {
+      const userIds = [
+        ...new Set(
+          stickers
+            .map((s) => s.successPerson)
+            .filter((v): v is string => Boolean(v))
+        ),
+      ];
+
+      if (userIds.length > 0) {
+        const userMap = await LdapService.getDisplayNamesByUserIds(userIds);
+
+        // perrašom successPerson į displayName
+        for (const s of stickers) {
+          if (s.successPerson) {
+            s.successPerson = userMap.get(s.successPerson) ?? s.successPerson;
+          }
+        }
+      }
+    }
+
     const totalStickers = await prisma.sterilizationCycleItem.count({ where });
 
     const totalPages =
@@ -107,11 +132,13 @@ export default class StickerService {
 
   /**
    *
-   * @param short_code as string
+   * @param short_code
+   * @param user_id
    * @returns Updated sterilization cycle item
    */
   static async toggleStickerSuccess(
-    short_code: string
+    short_code: string,
+    user_id: string
   ): Promise<TSterilizationCycleItem> {
     const existingCycleItem = await prisma.sterilizationCycleItem.findUnique({
       where: { short_code },
@@ -124,6 +151,7 @@ export default class StickerService {
       where: { short_code },
       data: {
         success: !existingCycleItem.success,
+        successPerson: user_id,
       },
     });
 

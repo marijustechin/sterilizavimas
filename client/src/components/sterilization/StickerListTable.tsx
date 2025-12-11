@@ -1,4 +1,6 @@
 import HelperService from '../../services/helperService';
+import { selectStickersOnlyDefected } from '../../store/features/stickerSlice';
+import { useAppSelector } from '../../store/store';
 import type { TSticker } from '../../types';
 import { StickerSuccessToggleCheckbox } from '../sticker/StickerSuccessToggleCheckbox';
 
@@ -7,6 +9,8 @@ interface StickerListTableProps {
 }
 
 export const StickerListTable = ({ stickers }: StickerListTableProps) => {
+  const onlyDefected = useAppSelector(selectStickersOnlyDefected);
+
   return (
     <table className='w-full text-left mt-5'>
       <thead className='uppercase bg-slate-200 text-center'>
@@ -55,11 +59,16 @@ export const StickerListTable = ({ stickers }: StickerListTableProps) => {
               <td className='text-center'>{sticker.cycle.cycle_number}</td>
               <td>{sticker.instrument.instrument_name}</td>
               <td>{sticker.department.department_name}</td>
-              <td className='text-center pt-1'>
+              <td className='flex gap-2 items-center justify-center p-1'>
                 <StickerSuccessToggleCheckbox
                   success={sticker.success}
                   short_code={sticker.short_code}
                 />
+                {onlyDefected && (
+                  <p className='text-xs font-light'>
+                    ({sticker.successPerson})
+                  </p>
+                )}
               </td>
             </tr>
           ))

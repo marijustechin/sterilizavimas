@@ -1,3 +1,4 @@
+import { DocStatus } from '../../../../server/src/config/generated/prisma/enums';
 import type { TAdminRecord } from '../../types';
 import { AdminListTableFilterStatus } from './AdminListTableFilterStatus';
 import { AdminListTableSorting } from './AdminListTableSorting';
@@ -7,6 +8,16 @@ interface AdminListTableProps {
 }
 
 export const AdminListTable = ({ cycleRecords }: AdminListTableProps) => {
+  const statusClasses: Record<DocStatus, string> = {
+    [DocStatus.nepatvirtintas]: 'bg-amber-100',
+    [DocStatus.patvirtintas]: 'bg-emerald-100',
+    [DocStatus.atšauktas]: 'bg-rose-100',
+    [DocStatus.anuliuotas]: 'bg-gray-200',
+  };
+
+  const getClass = (status: DocStatus) =>
+    statusClasses[status] ?? 'bg-gray-200';
+
   return (
     <div className='shadow overflow-hidden rounded border-b border-gray-200'>
       <table className='min-w-full'>
@@ -71,7 +82,11 @@ export const AdminListTable = ({ cycleRecords }: AdminListTableProps) => {
                 {record.usedAt ? record.usedAt : '---'}
               </td>
               <td className='text-center text-xs'>
-                {record.docStatus ? record.docStatus : '---'}
+                <span
+                  className={`px-1 rounded-sm ${getClass(record.docStatus)}`}
+                >
+                  {record.docStatus ? record.docStatus : '---'}
+                </span>
               </td>
             </tr>
           ))}

@@ -67,9 +67,9 @@ export const AdminListTableSorting = ({
       {/* Logika, kuri paima teisingą ikoną: */}
       {isActive ? (
         currentSortOrder === 'asc' ? (
-          <FaSortUp size={18} className='text-blue-500' /> // Galite priskirti spalvą aktyviam
+          <FaSortUp size={18} className='text-amber-300' /> // Galite priskirti spalvą aktyviam
         ) : (
-          <FaSortDown size={18} className='text-blue-500' />
+          <FaSortDown size={18} className='text-amber-300' />
         )
       ) : (
         <FaSort size={18} className='text-gray-400' /> // Nereikia aktyvaus rikiavimą rodančios ikonėlės

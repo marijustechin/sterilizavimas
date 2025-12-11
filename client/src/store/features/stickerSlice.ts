@@ -84,12 +84,12 @@ export const getStickers = createAsyncThunk<
 // toggle success
 export const toggleStickerSuccess = createAsyncThunk<
   TSterilizationCycleItem,
-  { short_code: string }
+  { short_code: string; user_id: string }
 >(
   'sticker/toggleStickerSuccess',
-  async ({ short_code }, { rejectWithValue }) => {
+  async ({ short_code, user_id }, { rejectWithValue }) => {
     try {
-      return await StickerService.toggleStickerSuccess(short_code);
+      return await StickerService.toggleStickerSuccess(short_code, user_id);
     } catch (error) {
       return rejectWithValue(HelperService.errorToString(error));
     }
@@ -203,6 +203,7 @@ export const {
 } = stickerSlice.actions;
 
 export const selectStickers = (state: RootState) => state.sticker;
+export const selectOnlyStickers = (state: RootState) => state.sticker.stickers;
 export const selectStickersOnlyDefected = (state: RootState) =>
   state.sticker.onlyDefected;
 export const selectStickersSearchString = (state: RootState) =>

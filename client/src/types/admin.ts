@@ -1,4 +1,5 @@
 import type { TDepartment, TInstrument } from './sterilization';
+import { DocStatus } from '../../../server/src/config/generated/prisma/enums';
 
 export type TAdminRecord = {
   id: number;
@@ -10,7 +11,7 @@ export type TAdminRecord = {
   usedAt: string | null;
   usedBy: string | null;
   usedTo: string | null;
-  docStatus: string | null;
+  docStatus: DocStatus;
 };
 
 export type TCycleDataResponse = {
