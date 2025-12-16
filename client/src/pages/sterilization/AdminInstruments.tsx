@@ -11,7 +11,7 @@ import type { TInstrument } from '../../types';
 import toast from 'react-hot-toast';
 import { AddEditInstrumentForm } from '../../components/admin/AddEditInstrumentForm';
 
-export const AdminInstruments = () => {
+export default function AdminInstruments() {
   const dispatch = useAppDispatch();
   const instruments = useAppSelector(selectInstruments);
   const instrumentStatus = useAppSelector(selectInstrumentStatus);
@@ -147,4 +147,4 @@ export const AdminInstruments = () => {
       />
     </main>
   );
-};
+}

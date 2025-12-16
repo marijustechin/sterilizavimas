@@ -16,6 +16,8 @@ export type TSticker = {
   department_id: number;
   success: boolean;
   successPerson: string;
+  successAt: string;
+  successReason: string;
   instrument: TInstrument;
   department: TDepartment;
   cycle: TCycle;

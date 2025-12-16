@@ -28,7 +28,7 @@ export default class LdapService {
    * @param dn string
    * @returns object {role:string, division:string}
    */
-  private static extractOrgInfoFromDN(dn: string) {
+  private static extractOrgInfoFromDN(dn: string, userName: string) {
     const ouMatches = dn.match(/OU=([^,]+)/g); // randa visas OU reikšmes
     console.log('LdapService 33: ', ouMatches);
 
@@ -41,7 +41,9 @@ export default class LdapService {
 
     // Role logika
     const role =
-      ous.includes('IT skyrius') || ous.includes('Programuotojai')
+      ous.includes('IT Skyrius') ||
+      ous.includes('Programuotojai') ||
+      userName === 'gabsim'
         ? 'admin'
         : 'user';
 
@@ -142,12 +144,11 @@ export default class LdapService {
         scope: 'sub',
         filter: `(sAMAccountName=${username})`,
         // kol kas imam tik šiuos atributus
-        // attributes: [
-        //   'displayName', // Vardas pavarde
-        //   'objectGUID',
-        //   'sAMAccountName', // username
-        // ],
-        attributes: ['*'],
+        attributes: [
+          'dn',
+          'displayName', // Vardas pavarde
+          'objectGUID',
+        ],
         // *** SVARBU: ldapts kazka padaro su objectGUID, todel reikia naudoti explicitBufferAttributes ***
         explicitBufferAttributes: ['objectGUID'], // Nurodome, kad objectGUID yra dvejetainis ir norime jį gauti kaip Buffer
       });
@@ -164,7 +165,10 @@ export default class LdapService {
       const displayName = userEntry.displayName;
       const userId = this.objectGUIDBufferToIDString(userEntry.objectGUID);
 
-      const { division, role } = this.extractOrgInfoFromDN(userEntry.dn);
+      const { division, role } = this.extractOrgInfoFromDN(
+        userEntry.dn,
+        username
+      );
 
       const userData = {
         userId: userId,

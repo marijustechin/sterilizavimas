@@ -12,7 +12,7 @@ import { AddEditPrinterForm } from '../../components/admin/AddEditPrinterForm';
 import { ActivePrinterToggleCheckbox } from '../../components/admin/ActivePrinterToggleCheckbox';
 import toast from 'react-hot-toast';
 
-export const PrintersPage = () => {
+export default function PrintersPage() {
   const dispatch = useAppDispatch();
   const printers = useAppSelector(selectPrinter);
   const printersStatus = useAppSelector(selectPrinterStatus);
@@ -180,4 +180,4 @@ export const PrintersPage = () => {
       />
     </main>
   );
-};
+}

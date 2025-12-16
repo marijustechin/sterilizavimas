@@ -1,18 +1,35 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router';
-import { MainLayout } from './layouts/MainLayout';
-import { HomePage } from './pages/HomePage';
-import { AdminLayout } from './layouts/AdminLayout';
-import { AdminPage } from './pages/admin/AdminPage';
-import { SterilizationPage } from './pages/sterilization/SterilizationPage';
-import { SterilizationLayout } from './layouts/SterilizationLayout';
 import { useAppDispatch, useAppSelector } from './store/store';
 import { checkAuth, selectIsInitialized } from './store/features/authSlice';
-import { useEffect } from 'react';
-import { AdminInstruments } from './pages/sterilization/AdminInstruments';
-import { AdminDepartments } from './pages/sterilization/AdminDepartments';
-import { AdminSterilizers } from './pages/sterilization/AdminSterilizers';
-import { PrintersPage } from './pages/admin/PrintersPage';
-import { AdminStickers } from './pages/sterilization/AdminStickers';
+
+// Layouts
+import { MainLayout } from './layouts/MainLayout';
+import { AdminLayout } from './layouts/AdminLayout';
+import { SterilizationLayout } from './layouts/SterilizationLayout';
+
+// Dinaminiai importai (smaller chunks)
+const LazyHomePage = React.lazy(() => import('./pages/HomePage'));
+const LazyAdminPage = React.lazy(() => import('./pages/admin/AdminPage'));
+const LazyPrintersPage = React.lazy(() => import('./pages/admin/PrintersPage'));
+const LazyAdminReportsPage = React.lazy(
+  () => import('./pages/admin/AdminReportsPage')
+);
+const LazySterilizationPage = React.lazy(
+  () => import('./pages/sterilization/SterilizationPage')
+);
+const LazyAdminInstruments = React.lazy(
+  () => import('./pages/sterilization/AdminInstruments')
+);
+const LazyAdminDepartments = React.lazy(
+  () => import('./pages/sterilization/AdminDepartments')
+);
+const LazyAdminSterilizers = React.lazy(
+  () => import('./pages/sterilization/AdminSterilizers')
+);
+const LazyAdminStickers = React.lazy(
+  () => import('./pages/sterilization/AdminStickers')
+);
 
 function App() {
   const dispatch = useAppDispatch();
@@ -34,28 +51,32 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<MainLayout />}>
-          <Route index element={<HomePage />} />
+          <Route index element={<LazyHomePage />} />
         </Route>
         <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<AdminPage />} />
-          <Route path='/admin/spausdintuvai' element={<PrintersPage />} />
+          <Route index element={<LazyAdminPage />} />
+          <Route path='/admin/spausdintuvai' element={<LazyPrintersPage />} />
+          <Route path='/admin/statistika' element={<LazyAdminReportsPage />} />
         </Route>
 
         <Route path='/sterilizavimas' element={<SterilizationLayout />}>
-          <Route index element={<SterilizationPage />} />
+          <Route index element={<LazySterilizationPage />} />
           <Route
             path='/sterilizavimas/sterilizatoriai'
-            element={<AdminSterilizers />}
+            element={<LazyAdminSterilizers />}
           />
           <Route
             path='/sterilizavimas/instrumentai'
-            element={<AdminInstruments />}
+            element={<LazyAdminInstruments />}
           />
           <Route
             path='/sterilizavimas/skyriai'
-            element={<AdminDepartments />}
+            element={<LazyAdminDepartments />}
           />
-          <Route path='/sterilizavimas/lipdukai' element={<AdminStickers />} />
+          <Route
+            path='/sterilizavimas/lipdukai'
+            element={<LazyAdminStickers />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

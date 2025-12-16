@@ -138,7 +138,8 @@ export default class StickerService {
    */
   static async toggleStickerSuccess(
     short_code: string,
-    user_id: string
+    user_id: string,
+    successReason: string = 'Sterilizatoriaus gedimas'
   ): Promise<TSterilizationCycleItem> {
     const existingCycleItem = await prisma.sterilizationCycleItem.findUnique({
       where: { short_code },
@@ -152,6 +153,8 @@ export default class StickerService {
       data: {
         success: !existingCycleItem.success,
         successPerson: user_id,
+        successReason: successReason,
+        successAt: new Date(),
       },
     });
 

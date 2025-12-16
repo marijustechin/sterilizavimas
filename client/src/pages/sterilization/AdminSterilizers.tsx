@@ -11,7 +11,7 @@ import { ConfirmationModal } from '../../components/ConfirmationModal';
 import { AddEditSterilizerForm } from '../../components/admin/AddEditSterilizerForm';
 import toast from 'react-hot-toast';
 
-export const AdminSterilizers = () => {
+export default function AdminSterilizers() {
   const dispatch = useAppDispatch();
   const sterilizers = useAppSelector(selectSterilizer);
   const sterilizerStatus = useAppSelector(selectSterilizerStatus);
@@ -142,4 +142,4 @@ export const AdminSterilizers = () => {
       />
     </main>
   );
-};
+}

@@ -1,9 +1,14 @@
 import { addDays, format } from 'date-fns';
 import { prisma } from '../config/prisma.js';
+import { Prisma } from '../config/generated/prisma/client.js';
 import LdapService from './ldapService.js';
 import HelperService from './helperService.js';
-import { TAdminListFilters, TAdminRecord } from '../types/admin.js';
-import { Prisma } from '../config/generated/prisma/client.js';
+import ReportService from './reportService.js';
+import {
+  TAdminListFilters,
+  TAdminRecord,
+  TAdminReportResponse,
+} from '../types/admin.js';
 
 /**
  * Naudojama rikiavimui buildOrderByClause metode
@@ -35,6 +40,55 @@ const SORT_MAP: Record<
 };
 
 export default class AdminService {
+  static async getReports(
+    startDate: string = new Date().toISOString(),
+    endDate: string = new Date().toISOString()
+  ): Promise<TAdminReportResponse> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // pradinis filtras
+    const where: Prisma.SterilizationCycleItemWhereInput = {
+      cycle: {
+        sterilization_date: {
+          gte: start,
+          lte: end,
+        },
+      },
+    };
+
+    const [total, totalBad] = await Promise.all([
+      prisma.sterilizationCycleItem.count({ where }),
+      prisma.sterilizationCycleItem.count({
+        where: { ...where, success: false },
+      }),
+    ]);
+
+    const instrumentsInDepartments =
+      await ReportService.getInstrumentsInDepartments(start, end);
+    const instrumentsByMedic = await ReportService.getInstrumentsByMedic(
+      start,
+      end
+    );
+    const instrumentStats = await ReportService.getInstrumentSterilizationStats(
+      start,
+      end
+    );
+
+    return {
+      instrumentStats,
+      instrumentsByMedic,
+      instrumentsInDepartments,
+      total: total,
+      totalBad: totalBad,
+    };
+  }
+
+  /**
+   *
+   * @param filters
+   * @returns
+   */
   static async getInstrumentUsageData(filters: TAdminListFilters) {
     const limit = HelperService.toIntSafe(filters.limit) ?? 15;
     const currentPage = HelperService.toIntSafe(filters.currentPage) ?? 1;

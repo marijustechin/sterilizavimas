@@ -3,39 +3,39 @@ import {
   type UniqueIdentifier,
   type DragEndEvent,
   pointerWithin,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 
-import { SelectSterilizer } from "../../components/sterilization/SelectSterilizer";
-import { useAppDispatch, useAppSelector } from "../../store/store";
+import { SelectSterilizer } from '../../components/sterilization/SelectSterilizer';
+import { useAppDispatch, useAppSelector } from '../../store/store';
 import {
   getInstruments,
   selectInstruments,
   selectInstrumentStatus,
-} from "../../store/features/instrumentSlice";
+} from '../../store/features/instrumentSlice';
 import {
   getDepartments,
   selectDepartements,
   selectDepartmentStatus,
-} from "../../store/features/departmentSlice";
-import { useEffect } from "react";
+} from '../../store/features/departmentSlice';
+import { useEffect } from 'react';
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import toast from "react-hot-toast";
-import { DragableInstrument } from "../../components/sterilization/DragableInstrument";
-import type { TInstrument } from "../../types";
-import { DragableDepartment } from "../../components/sterilization/DragableDepartment";
-import { DroppableSterilizer } from "../../components/sterilization/DroppableSterilizer";
+} from '@dnd-kit/sortable';
+import toast from 'react-hot-toast';
+import { DragableInstrument } from '../../components/sterilization/DragableInstrument';
+import type { TInstrument } from '../../types';
+import { DragableDepartment } from '../../components/sterilization/DragableDepartment';
+import { DroppableSterilizer } from '../../components/sterilization/DroppableSterilizer';
 import {
   addDepartmentToSterilizer,
   addInstrumentToDepartment,
   selectedDepartments,
   selectedInstruments,
   selectPrintingPreview,
-} from "../../store/features/sterilizationSlice";
-import { StickerList } from "../../components/sticker/StickerList";
-import { SelectPrinter } from "../../components/sterilization/SelectPrinter";
+} from '../../store/features/sterilizationSlice';
+import { StickerList } from '../../components/sticker/StickerList';
+import { SelectPrinter } from '../../components/sterilization/SelectPrinter';
 
 // //////////////////////////////////////
 export interface IInstrumentInDepartment {
@@ -45,7 +45,7 @@ export interface IInstrumentInDepartment {
 }
 /////////////////////////////////////////
 
-export const SterilizationPage = () => {
+export default function SterilizationPage() {
   const dispatch = useAppDispatch();
   const allInstruments = useAppSelector(selectInstruments);
   const allDepartments = useAppSelector(selectDepartements);
@@ -60,10 +60,10 @@ export const SterilizationPage = () => {
   const printingPreview = useAppSelector(selectPrintingPreview);
 
   useEffect(() => {
-    if (instrumentStatus === "idle") {
+    if (instrumentStatus === 'idle') {
       dispatch(getInstruments());
     }
-    if (departmentStatus === "idle") {
+    if (departmentStatus === 'idle') {
       dispatch(getDepartments());
     }
   }, [dispatch, instrumentStatus, departmentStatus]);
@@ -77,19 +77,19 @@ export const SterilizationPage = () => {
     const overId = over.id;
 
     // Išsiaiškinkime, kokio tipo yra tempimo elementas
-    const isDepartment = activeId.toString().startsWith("department-");
+    const isDepartment = activeId.toString().startsWith('department-');
     // Instrumentai gali būti sugeneruoti su unikaliu ID tempimo metu, bet pradiniame sąraše jie yra "instrument-id"
-    const isOriginalInstrument = activeId.toString().startsWith("instrument-");
+    const isOriginalInstrument = activeId.toString().startsWith('instrument-');
 
     // Išsiaiškinkime, kokio tipo yra numetimo zona
-    const isSterilizerDropzone = overId === "sterilizer-dropzone";
+    const isSterilizerDropzone = overId === 'sterilizer-dropzone';
     const isDepartmentDropzone = overId
       .toString()
-      .startsWith("department-dropzone-");
+      .startsWith('department-dropzone-');
 
     if (isDepartment && isSterilizerDropzone) {
       const departmentId = parseInt(
-        activeId.toString().replace("department-", "")
+        activeId.toString().replace('department-', '')
       );
       const departmentToMove = allDepartments?.find(
         (d) => d.id === departmentId
@@ -117,14 +117,14 @@ export const SterilizationPage = () => {
 
     // Draudžiama: Instrumentų tempimas į sterilizatorių (tiesiog nieko nedarome)
     if (isOriginalInstrument && isSterilizerDropzone) {
-      toast.error("Instrumentų negalima tempti tiesiai į sterilizatorių!");
+      toast.error('Instrumentų negalima tempti tiesiai į sterilizatorių!');
 
       return; // Nieko nedarome
     }
 
     // Draudžiama: Skyrių tempimas į instrumentų zonas ar kitas netinkamas vietas
     if (isDepartment && !isSterilizerDropzone) {
-      toast.error("Skyrių galima tempti tik į sterilizatorių!");
+      toast.error('Skyrių galima tempti tik į sterilizatorių!');
     }
   };
 
@@ -133,12 +133,12 @@ export const SterilizationPage = () => {
     activeId: UniqueIdentifier
   ) => {
     const instrumentId = parseInt(
-      activeId.toString().replace("instrument-", "")
+      activeId.toString().replace('instrument-', '')
     );
 
     const targetDepartmentIdStr = overId
       .toString()
-      .replace("department-dropzone-", "");
+      .replace('department-dropzone-', '');
     const targetDepartmentId = parseInt(targetDepartmentIdStr);
 
     const instrumentToMove = allInstruments?.find((i) => i.id === instrumentId);
@@ -172,7 +172,7 @@ export const SterilizationPage = () => {
   };
 
   return (
-    <main className="flex-col gap-2">
+    <main className='flex-col gap-2'>
       {printingPreview ? (
         <StickerList />
       ) : (
@@ -180,11 +180,11 @@ export const SterilizationPage = () => {
           collisionDetection={pointerWithin}
           onDragEnd={handleDragEndN}
         >
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             {/* Skyriai ////////////////////////////////////////////////////////////////////// */}
-            <section className="w-1/4 flex-col gap-2">
-              <h2 className="text-xl text-center font-semibold p-2">Skyriai</h2>
-              <div className="bg-amber-200 p-1 rounded-lg min-h-56">
+            <section className='w-1/4 flex-col gap-2'>
+              <h2 className='text-xl text-center font-semibold p-2'>Skyriai</h2>
+              <div className='bg-amber-200 p-1 rounded-lg min-h-56'>
                 {allDepartments ? (
                   <SortableContext
                     items={
@@ -219,13 +219,13 @@ export const SterilizationPage = () => {
               </div>
             </section>
             {/* Sterilizatorius ////////////////////////////////////////////////////////////// */}
-            <section className="w-2/4 flex-col gap-2">
-              <div className="flex gap-3">
+            <section className='w-2/4 flex-col gap-2'>
+              <div className='flex gap-3'>
                 <SelectSterilizer />
                 <SelectPrinter />
               </div>
 
-              <div className="p-1 rounded-lg mt-1 min-h-56">
+              <div className='p-1 rounded-lg mt-1 min-h-56'>
                 <DroppableSterilizer
                   instruments={instrumentsSelected}
                   selectedDepartments={departmentsSelected}
@@ -233,11 +233,11 @@ export const SterilizationPage = () => {
               </div>
             </section>
             {/* Instrumentai ///////////////////////////////////////////////////////////////////// */}
-            <section className="w-1/4 flex-col gap-2">
-              <h2 className="text-xl text-center font-semibold p-2">
+            <section className='w-1/4 flex-col gap-2'>
+              <h2 className='text-xl text-center font-semibold p-2'>
                 Instrumentai
               </h2>
-              <div className="bg-sky-200 p-1 rounded-lg min-h-56">
+              <div className='bg-sky-200 p-1 rounded-lg min-h-56'>
                 {allInstruments ? (
                   <SortableContext
                     items={allInstruments.map(
@@ -263,4 +263,4 @@ export const SterilizationPage = () => {
       )}
     </main>
   );
-};
+}

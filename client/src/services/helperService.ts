@@ -5,7 +5,6 @@ import type { TUser } from '../types/user';
 import type { TSticker } from '../types';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import '../fonts/dejavu.ts';
 
 export default class HelperService {
   static errorToString(error: unknown): string {
@@ -54,12 +53,16 @@ export default class HelperService {
     date?: boolean,
     time?: boolean
   ): string {
-    // 1. Pirmiausia paverčiam ISO formatą į JavaScript Date objektą
-    const dateObject = parseISO(dateString);
-    if (date) return format(dateObject, 'yyyy-MM-dd');
-    if (time) return format(dateObject, 'HH:mm:ss');
+    if (dateString) {
+      // 1. Pirmiausia paverčiam ISO formatą į JavaScript Date objektą
+      const dateObject = parseISO(dateString);
+      if (date) return format(dateObject, 'yyyy-MM-dd');
+      if (time) return format(dateObject, 'HH:mm:ss');
 
-    return format(dateObject, 'yyyy-MM-dd HH:mm:ss');
+      return format(dateObject, 'yyyy-MM-dd HH:mm:ss');
+    } else {
+      return '---';
+    }
   }
 
   /**
@@ -96,42 +99,58 @@ export default class HelperService {
     user: string
   ): Promise<void> {
     const pdf = new jsPDF();
+
+    const { addDejaVuFonts } = await import('../fonts/dejavu');
+    await addDejaVuFonts(pdf);
+
     pdf.setFont('DejaVuSans', 'normal');
     pdf.setProperties({ title: 'Nesėkmingas sterilizavimas' });
     pdf.setFontSize(10);
     pdf.text('VšĮ Karoliniškių poliklinika', 14, 10);
-    pdf.setFontSize(18);
-    pdf.text(`Nesėkmingas sterilizavimas (${period} m.)`, 14, 20);
+    pdf.line(14, 12, 62, 12);
+    pdf.setFontSize(16);
+    pdf.text(
+      `Galimai nesterilių medicinos priemonių atšaukimo žurnalas`,
+      14,
+      20
+    );
     pdf.setFontSize(8);
-    pdf.text(`Ataskaitą sudarė: ${user}`, 14, 26);
+    pdf.text(`Ataskaitą parengė: ${user}`, 14, 26);
     pdf.text(
       `Data ir laikas: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`,
       14,
       30
     );
+    pdf.text(
+      `Viso instrumentų: ${stickers.length}. Laikotarpis: ${period} m.`,
+      14,
+      34
+    );
 
     const tableHead = [
       'ID',
       'Data',
-      'Laikas',
       'Partija',
       'Instrumentas',
       'Skyrius',
       'Pažymėjo',
+      'Data',
+      'Priežastis',
     ];
 
     const tableBody = stickers.map((sticker) => [
       sticker.short_code,
-      this.dateStringToDate(sticker.cycle.sterilization_date, true, false),
-      this.dateStringToDate(sticker.cycle.sterilization_date, false, true),
+      this.dateStringToDate(sticker.cycle.sterilization_date),
       sticker.cycle.cycle_number,
       sticker.instrument.instrument_name,
       sticker.department.department_name,
       sticker.successPerson,
+      this.dateStringToDate(sticker.successAt),
+      sticker.successReason,
     ]);
 
     autoTable(pdf, {
-      startY: 35,
+      startY: 36,
       headStyles: {
         fillColor: [248, 250, 252],
         textColor: [50, 50, 50],
@@ -147,6 +166,11 @@ export default class HelperService {
       styles: { font: 'DejaVuSans', fontStyle: 'normal' },
     });
 
-    pdf.save(`blogi-lipdukai-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.pdf`);
+    pdf.save(
+      `galimai-nesteriliu-medicinos-priemoniu-atsaukimo-zurnalas-${format(
+        new Date(),
+        'yyyy-MM-dd-HH-mm-ss'
+      )}.pdf`
+    );
   }
 }
