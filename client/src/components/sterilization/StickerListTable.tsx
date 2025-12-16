@@ -21,7 +21,7 @@ export const StickerListTable = ({ stickers }: StickerListTableProps) => {
           <th>Partijos Nr.</th>
           <th>Instrumentas</th>
           <th>Skyrius</th>
-          <th>Blogas (pažymėti)</th>
+          <th>{onlyDefected ? <>Pažymėjo</> : <>Blogas (pažymėti)</>}</th>
         </tr>
       </thead>
       <tbody>
@@ -65,9 +65,14 @@ export const StickerListTable = ({ stickers }: StickerListTableProps) => {
                   short_code={sticker.short_code}
                 />
                 {onlyDefected && (
-                  <p className='text-xs font-light'>
-                    ({sticker.successPerson})
-                  </p>
+                  <div className='flex flex-col'>
+                    <p className='text-xs font-light'>
+                      {sticker.successPerson}
+                    </p>
+                    <p className='text-xs font-extralight'>
+                      {HelperService.dateStringToDate(sticker.successAt)}
+                    </p>
+                  </div>
                 )}
               </td>
             </tr>

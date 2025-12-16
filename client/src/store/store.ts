@@ -8,6 +8,7 @@ import instrumentsReducer from './features/instrumentSlice';
 import departmentReducer from './features/departmentSlice';
 import sterilizationReducer from './features/sterilizationSlice';
 import adminReducer from './features/adminSlice';
+import adminReportReducer from './features/adminReportSlice';
 import printerReducer from './features/printerSlice';
 import stickerReducer from './features/stickerSlice';
 
@@ -21,6 +22,7 @@ export const store = configureStore({
     admin: adminReducer,
     printers: printerReducer,
     sticker: stickerReducer,
+    adminReport: adminReportReducer,
   },
 });
 

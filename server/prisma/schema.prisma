@@ -66,16 +66,19 @@ model SterilizationCycle {
 
   @@index([cycle_number])
   @@index([user_id])
+  @@index([sterilization_date])
 }
 
 model SterilizationCycleItem {
-  id            Int     @id @default(autoincrement())
-  short_code    String? @unique @db.VarChar(6)
+  id            Int       @id @default(autoincrement())
+  short_code    String?   @unique @db.VarChar(6)
   cycle_id      Int
   instrument_id Int
   department_id Int
-  success       Boolean @default(true)
+  success       Boolean   @default(true)
   successPerson String?
+  successAt     DateTime?
+  successReason String?
 
   cycle      SterilizationCycle @relation(fields: [cycle_id], references: [id])
   instrument Instrument         @relation(fields: [instrument_id], references: [id])
@@ -83,6 +86,10 @@ model SterilizationCycleItem {
 
   // 1:1 – instrumentas šiame cikle gali būti panaudotas tik kartą
   usage InstrumentUsage? // <-- vietoje masyvo: vienas arba nėra
+
+  @@index([cycle_id])
+  @@index([department_id])
+  @@index([success])
 }
 
 model InstrumentUsage {
@@ -98,6 +105,8 @@ model InstrumentUsage {
   cycle_item SterilizationCycleItem @relation(fields: [cycle_item_id], references: [id])
 
   @@index([used_by])
+  @@index([createdAt])
+  @@index([doc_status])
 }
 
 model Printer {

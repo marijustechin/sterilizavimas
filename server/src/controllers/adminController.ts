@@ -3,6 +3,23 @@ import AdminService from '../services/adminService.js';
 import HelperService from '../services/helperService.js';
 
 export default class AdminController {
+  /**
+   *
+   * @param q
+   */
+  private static parseQuery(q: Record<string, string | string[] | undefined>) {
+    const first = (v?: string | string[]) => {
+      if (!v) return undefined;
+      return Array.isArray(v) ? v[0] : v;
+    };
+  }
+
+  /**
+   *
+   * @param req
+   * @param res
+   * @param next
+   */
   static async getInstrumentUsageData(
     req: Request,
     res: Response,
@@ -29,6 +46,31 @@ export default class AdminController {
 
       const result = await AdminService.getInstrumentUsageData(filters);
 
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   *
+   * @param req
+   * @param res
+   * @param next
+   */
+  static async getReports(req: Request, res: Response, next: NextFunction) {
+    try {
+      const q = req.query as Record<string, string | string[] | undefined>;
+
+      const first = (v?: string | string[]) => {
+        if (!v) return undefined;
+        return Array.isArray(v) ? v[0] : v;
+      };
+
+      const result = await AdminService.getReports(
+        first(q.startDate),
+        first(q.endDate)
+      );
       res.status(200).json(result);
     } catch (error) {
       next(error);

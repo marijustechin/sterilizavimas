@@ -9,7 +9,7 @@ import { StickerListTable } from '../../components/sterilization/StickerListTabl
 import { StickerListFilter } from '../../components/sterilization/StickerListFilter';
 import { Pagination } from '../../components/Pagination';
 
-export const AdminStickers = () => {
+export default function AdminStickers() {
   const dispatch = useAppDispatch();
   const stickers = useAppSelector(selectStickers);
 
@@ -38,4 +38,4 @@ export const AdminStickers = () => {
       />
     </main>
   );
-};
+}

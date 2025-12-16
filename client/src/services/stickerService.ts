@@ -10,12 +10,13 @@ export default class StickerService {
 
   static async toggleStickerSuccess(
     short_code: string,
-    user_id: string
+    user_id: string,
+    successReason: string = 'Sterilizatoriaus gedimas'
   ): Promise<TSterilizationCycleItem> {
-    console.log(user_id, '- user id');
     const response = await $axios.post('/sticker/togglesuccess', {
       short_code,
       user_id,
+      successReason,
     });
 
     return response.data;

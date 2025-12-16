@@ -40,9 +40,13 @@ export default class StickerController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { short_code, user_id } = req.body;
+      const { short_code, user_id, successReason } = req.body;
       const updatedSterilizationCycleItem =
-        await StickerService.toggleStickerSuccess(short_code, user_id);
+        await StickerService.toggleStickerSuccess(
+          short_code,
+          user_id,
+          successReason
+        );
 
       res.status(200).json(updatedSterilizationCycleItem);
     } catch (error) {

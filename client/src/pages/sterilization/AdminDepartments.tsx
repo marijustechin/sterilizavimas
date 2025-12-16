@@ -11,7 +11,7 @@ import { ConfirmationModal } from '../../components/ConfirmationModal';
 import { AddEditDepartmentForm } from '../../components/admin/AddEditDepartmentForm';
 import toast from 'react-hot-toast';
 
-export const AdminDepartments = () => {
+export default function AdminDepartments() {
   const dispatch = useAppDispatch();
   const departments = useAppSelector(selectDepartements);
   const depatrmentStatus = useAppSelector(selectDepartmentStatus);
@@ -143,4 +143,4 @@ export const AdminDepartments = () => {
       />
     </main>
   );
-};
+}

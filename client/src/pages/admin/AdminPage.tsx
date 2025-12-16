@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from '../../store/store';
 import { AdminListFilters } from '../../components/admin/AdminListFilters';
 import { AdminListTable } from '../../components/admin/AdminListTable';
 
-export const AdminPage = () => {
+export default function AdminPage() {
   const dispatch = useAppDispatch();
   const cycleRecords = useAppSelector(selectCycleRecords);
   const adminStatus = useAppSelector(selectAdminStatus);
@@ -44,4 +44,4 @@ export const AdminPage = () => {
       />
     </main>
   );
-};
+}
