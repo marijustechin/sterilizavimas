@@ -1,42 +1,92 @@
-# Sterilizavimo procesų informacinė sistema
+# 🏥 Medicininių instrumentų sterilizavimo informacinė sistema
 
-## Diegimas (Deployment)
+Pilna (full-stack) informacinė sistema, skirta poliklinikos sterilizavimo procesų registravimui, kontrolei ir auditui.
+Sistema modeliuoja realią darbo eigą — nuo instrumento sterilizavimo iki jo panaudojimo pacientui — ir leidžia atlikti pilną atsekamumą (traceability).
+Šis projektas - realiai naudojamos sistemos prototipas, o ne demonstracinė CRUD aplikacija.
 
-Ši seka skirta programos atnaujinimui gamybos (production) serveryje.
+---
 
-### 1. Kodo sudarymas (Build)
+## Problema
 
-Prieš kopijuojant, sugeneruokite naujus statinius failus:
+Medicinos įstaigose sterilizuoti instrumentai dažnai žymimi rankiniu būdu arba naudojant nesusietas sistemas.  
+Infekcijos atveju tampa praktiškai neįmanoma atsakyti:
 
-a) **Frontend (Client)**
-npm run build:client
+- kas sterilizavo instrumentą
+- kuriame skyriuje jis buvo naudojamas
+- kuris darbuotojas su juo dirbo
+- ar buvo registruoti defektai
 
-b) **Backend (Server)**
-npm run build:server
+Sistema sprendžia būtent šią auditavimo problemą.
 
-### 2. Stabdome programos vykdymą
+---
 
-pm2 stop ecosystem.config.js
+## Kaip veikia sistema
 
-### 3. Failų kopijavimas į serverį
+Kiekvienam instrumentui sugeneruojamas unikalus QR kodas/lipdukas.
+Toliau registruojamas visas jo gyvenimo ciklas:
+Sterilizatorius → Darbuotojas → Skyrius → Medicinos personalas → Pacientas → Defektas
+Tai leidžia identifikuoti klaidos vietą procese, o ne tik faktą, kad klaida įvyko.
 
-Vykdykite diegimo skriptą, kuris perkelia sugeneruotus 'dist' failus ir konfigūracijas į nuotolinį serverį (UNC kelią).
+---
 
-node deploy.js
+## Architektūra
 
-### 4. Komandos serveryje (Nuotolinė sesija)
 
-Būdami projekto serveryje aplanke (/Autoclave/backend) atlikite šiuos žingsnius:
+Sistema nėra puslapių rinkinys — tai vienas modeliuojamas procesas.
 
-a) **Gamybinių priklausomybių įdiegimas**
-Pašalina senus modulius ir įdiegia tik gamybai reikalingas priklausomybes.
-npm install --omit=dev
+---
 
-b) **Prisma modelių generavimas**
-Sukuriami reikalingi DB variklio failai ir kliento klasės.
-npx prisma generate
+## Pagrindinės funkcijos
 
-c) **Programos paleidimas iš naujo**
-Aplikacija paleidžiama iš naujo naudojant PM2 (rekomenduojama naudoti `reload` siekiant nulinės prastovos).
-pm2 start ecosystem.config.js
-pm2 save
+- Sterilizavimo partijų registravimas
+- Lipdukų generavimas ir spausdinimas
+- Instrumentų sekimas (lipdukų nuskaitymas panaudojimo metu)
+- Defektų registravimas
+- Administravimo suvestinė
+- Statistinės ataskaitos
+- Rolėmis pagrįsta prieiga
+
+---
+
+## Technologijos
+
+**Frontend**
+- React + TypeScript
+- Redux Toolkit
+- Vite
+- Zod
+- Recharts
+
+**Backend**
+- Node.js + Express
+- Prisma ORM
+- JWT autentifikacija
+- LDAP integracija
+- Service layer architektūra
+
+---
+
+## Projekto tikslas ir darbo eiga
+
+Projekto tikslas sukurti realiai veikiančią sistemą:
+
+- domeno analizė
+- duomenų modeliavimas
+- API projektavimas
+- UI pagal workflow
+- auditui skirtos sistemos kūrimas
+
+---
+
+## Paleidimas
+
+### Server
+cd server
+npm install
+npm run dev
+
+### Client
+cd client
+npm install
+npm run dev
+
